@@ -1,0 +1,14 @@
+---
+:backends:
+  - yaml
+
+:hierarchy:
+    - "nodes/%{clientcert}"
+    - "%{::asfosname}/%{::asfosrelease}"
+    - "colo/%{asfcolo}"
+    - "oem/%{::oem}"
+    - "common"
+
+:yaml:
+  :datadir: '/tmp/kitchen/hiera'
+

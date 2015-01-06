@@ -1,0 +1,38 @@
+---
+driver_config:
+  openstack_username: <%= ENV['OS_USERNAME'] %>
+  openstack_api_key: <%= ENV['OS_PASSWORD'] %>
+  openstack_auth_url: <%= "#{ENV['OS_AUTH_URL']}/tokens" %>
+  key_name: <%= ENV['OS_SSH_KEYPAIR'] %>
+  private_key_path: <%= ENV['OS_PRIVATE_SSH_KEY'] %>
+  public_key_path: <%= ENV['OS_PUBLIC_SSH_KEY'] %>
+  openstack_tenant: <%= ENV['OS_TENANT_NAME'] %>
+  floating_ip_pool: <%= ENV['OS_FLOATING_IP_POOL'] %>
+  flavor_ref: <%= ENV['OS_FLAVOR_REF'] %>
+  # Only use the following if you need to open up firewall ports
+  security_groups:
+    - <%= ENV['OS_SECURITY_GROUP_NO_FIREWALL'] %>
+
+provisioner:
+  name: puppet_apply
+  manifests_path: puppet/manifests
+  modules_path: puppet/modules
+  hiera_data_path: puppet/data
+  hiera_config_path: puppet/hiera.yaml
+
+platforms:
+- name: ubuntu14
+  driver_plugin: openstack
+  driver_config:
+    username: ubuntu
+    image_ref: "Ubuntu-14-puppet"
+
+suites:
+- name: default
+  manifest: init.pp
+
+- name: reprepro
+  manifest: init.pp
+
+- name: bugzilla
+  manifest: init.pp
