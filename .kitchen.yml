@@ -3,6 +3,7 @@ driver:
   name: vagrant
   box: trusty64
   box_url: http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-14.04_chef-provisionerless.box
+  vm_hostname: home.example.com
   network:
     - ["forwarded_port", {guest: 80, host: 8080}]
     - ["forwarded_port", {guest: 443, host: 8443}]
@@ -21,4 +22,6 @@ platforms:
 
 suites:
   - name: default
+    driver:
+      vm_hostname: 'home.vagrantup.com'
     manifest: site.pp
