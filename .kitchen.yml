@@ -2,7 +2,7 @@
 driver:
   name: vagrant
   box: trusty64
-#  box_url: http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-14.04_chef-provisionerless.box
+  box_url: http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-14.04_chef-provisionerless.box
   network:
     - ["forwarded_port", {guest: 80, host: 8080}]
     - ["forwarded_port", {guest: 443, host: 8443}]
@@ -11,6 +11,9 @@ provisioner:
   name: puppet_apply
   manifests_path: puppet/manifests
   modules_path: puppet/modules
+  hiera_data_path: puppet/data
+  hiera_config_path: puppet/hiera.yaml
+  http_proxy: 'http://192.168.1.3:3142'
 
 platforms:
   - name: ubuntu14
