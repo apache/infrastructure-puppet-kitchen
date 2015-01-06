@@ -1,5 +1,3 @@
 ---
 classes:
-  - apache
   - apt
-  - test
