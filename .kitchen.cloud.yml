@@ -12,6 +12,7 @@ driver_config:
   # Only use the following if you need to open up firewall ports
   security_groups:
     - <%= ENV['OS_SECURITY_GROUP_NO_FIREWALL'] %>
+  server_name: 'default-ubuntu14.vagrantup.com'
 
 provisioner:
   name: puppet_apply
