@@ -16,7 +16,20 @@ Usage
 -----
 
 Make sure to have some puppet modules in the ``puppet/modules/`` directory.
-The current hiera setup assumes you have the [apache](https://github.com/puppetlabs/puppetlabs-apache) module, and ASF's customfact module.
+The current hiera setup assumes you have the following modules:
+
++ [apache](https://github.com/puppetlabs/puppetlabs-apache) 
++ ASF's customfact
++ [concat](https://github.com/puppetlabs/puppetlabs-concat)
++ [stdlib](https://github.com/puppetlabs/puppetlabs-stdlib)
++ [apt](https://github.com/puppetlabs/puppetlabs-apt)
+
+If using [GitHub](https://github.com/) to obtain modules, make sure when you clone the module, it only has the module name on the resulting folder.
+Eample:
+
+```
+git clone https://github.com/puppetlabs/puppetlabs-apt.git apt
+```
 
 Then edit ``puppet/data/node/default-ubuntu14.vagrantup.com.yaml`` to start adding classes and setting class parameters.
 
