@@ -25,7 +25,7 @@ The current hiera setup assumes you have the following modules:
 + [apt](https://github.com/puppetlabs/puppetlabs-apt)
 
 If using [GitHub](https://github.com/) to obtain modules, make sure when you clone the module, it only has the module name on the resulting folder.
-Eample:
+Example:
 
 ```
 git clone https://github.com/puppetlabs/puppetlabs-apt.git apt
