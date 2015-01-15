@@ -13,6 +13,7 @@ provisioner:
   modules_path: puppet/modules
   hiera_data_path: puppet/data
   hiera_config_path: puppet/hiera.yaml
+  require_chef_for_busser: false
   http_proxy: 'http://192.168.1.3:3142'
 
 platforms:
