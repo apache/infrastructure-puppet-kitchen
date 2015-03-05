@@ -1,11 +1,6 @@
 ---
 driver:
   name: vagrant
-  box: trusty64
-  box_url: http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-14.04_chef-provisionerless.box
-  network:
-    - ["forwarded_port", {guest: 80, host: 8080}]
-    - ["forwarded_port", {guest: 443, host: 8443}]
 
 provisioner:
   name: puppet_apply
@@ -15,11 +10,26 @@ provisioner:
   hiera_config_path: puppet/hiera.yaml
   require_chef_for_busser: false
   http_proxy: 'http://192.168.1.3:3142'
+  require_chef_for_busser: false
 
 platforms:
   - name: ubuntu14
+    driver:
+      box: trusty64
+      box_url: http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-14.04_chef-provisionerless.box
+  - name: centos6
+    driver:
+      box: centos6
+      box_url: https://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.6_chef-provisionerless.box
 
 
 suites:
   - name: default
     manifest: site.pp
+    driver_config:
+      network:
+        - ["private_network", {ip: "192.168.33.2"}]
+      customize:
+        memory: 1024
+        cpus: 2
+
