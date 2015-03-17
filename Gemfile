@@ -1,7 +1,7 @@
 # A sample Gemfile
 source "https://rubygems.org"
 
-gem 'net-ssh', '2.9.2.beta' # Set  to this version to allow use of ed25519 keys in ssh config file
+gem 'net-ssh' # Should now accept the use of ed25519 keys in ssh config
 # gem "rails"
 gem "test-kitchen"
 gem "kitchen-puppet"
