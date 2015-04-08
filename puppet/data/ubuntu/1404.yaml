@@ -1,3 +1,57 @@
 ---
 classes:
   - apt
+  - base
+  - subversionclient
+
+base::basepackages:
+  - apt-file
+  - bash
+  - ca-certificates
+  - git
+  - sockstat
+  - software-properties-common
+  - zsh
+  - vim
+  - libnss-myhostname
+  - htop
+
+apt::sources:
+  'asf_internal':
+     location: 'http://pkgrepo.apache.org'
+     release: 'trusty'
+     repos: 'main'
+     key: 'E8640030'
+     key_server: 'pgp.mit.edu'
+     include_deb: true
+     include_src: false
+  'puppetlabs':
+     location: 'http://apt.puppetlabs.com'
+     release: 'trusty'
+     repos: 'main'
+     key: '4BD6EC30'
+     key_server: 'keyserver.ubuntu.com'
+     include_deb: true
+     include_src: false
+  'puppetdeps':
+     location: 'http://apt.puppetlabs.com'
+     release: 'trusty'
+     repos: 'dependencies'
+     key: '4BD6EC30'
+     key_server: 'keyserver.ubuntu.com'
+     include_deb: true
+     include_src: false
+
+fail2ban_asf::config::jails:
+  ssh:
+    filter: sshd
+    port: 22
+    logpath: /var/log/auth.log
+    findtime: 1800
+    maxretry: 5
+    enable: true
+
+subversionclient::packages:
+  - subversion
+subversionclient::svn_conf_config:       '/etc/subversion/config'
+subversionclient::svn_conf_servers:      '/etc/subversion/servers'
