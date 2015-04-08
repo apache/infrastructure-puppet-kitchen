@@ -1,0 +1,4 @@
+---
+classes:
+  - dell
+  - dell::openmanage
