@@ -63,7 +63,7 @@ apmirror::svnwc_user:                        "%{hiera('svnwcsub::username')}"
 
 svnwcsub::gid:                               '9997'
 svnwcsub::uid:                               '9997'
-svnwcsub::conf_file:                         'svnwcsub.conf'
+svnwcsub::conf_file:                         'svnwcsub.conf.test'
 svnwcsub:::conf_path:                        '/etc/'
 svnwcsub::groupname:                         'svnwc'
 svnwcsub::groups:
