@@ -1,0 +1,410 @@
+---
+classes:
+  - apache
+  - apache::mod::actions
+  - apache::mod::autoindex
+  - apache::mod::expires
+  - apache::mod::negotiation
+  - apache::mod::proxy
+  - apache::mod::proxy_http
+  - apache::mod::reqtimeout
+  - apache::mod::rewrite
+  - apache::mod::setenvif
+  - apache::mod::speling
+  - apache::mod::ssl
+  - apache::mod::status
+  - apache::mod::vhost_alias
+  - apbackup
+  - apmirror
+  - rootbin_asf
+  - svnwcsub
+  - tlp_vhosts::compat
+  - vhosts_asf::custom_config
+  - vhosts_asf::modules
+  - vhosts_asf::vhosts
+
+apache::keepalive:                           'On'
+apache::keepalive_timeout:                   '30'
+apache::default_vhost:                       false
+
+apache::default_ssl_cert:                    '/etc/ssl/certs/wildcard.apache.org.crt'
+apache::default_ssl_chain:                   '/etc/ssl/certs/wildcard.apache.org.chain'
+apache::default_ssl_key:                     '/etc/ssl/private/wildcard.apache.org.key'
+
+apache::logrotate_compressoptions:           '-9'
+apache::logrotate_rotate:                    5
+apache::logrotate_owner:                     'root'
+apache::logrotate_group:                     'apbackup'
+
+apache::mod::event::listenbacklog:           '1023'
+apache::mod::event::maxclients:              '750'
+apache::mod::event::maxconnectionsperchild:  '200000'
+apache::mod::event::maxrequestworkers:       '3750'
+apache::mod::event::maxsparethreads:         '750'
+apache::mod::event::minsparethreads:         '150'
+apache::mod::event::serverlimit:             '25'
+apache::mod::event::startservers:            '5'
+apache::mod::event::threadlimit:             '250'
+apache::mod::event::threadsperchild:         '150'
+apache::mod::status::allow_from:
+  - 'All'
+apache::mod::status::apache_version:         '2.3' # Force module to use Allow from syntax and actually allow anyone to check
+
+apache::mpm_module:                          'event'
+apache::serveradmin:                         'infrastructure@apache.org'
+
+apmirror::uid:                               '508'
+apmirror::gid:                               '508'
+apmirror::groups:
+  - 'svnwc'
+  - 'apbackup'
+apmirror::svnwc_group:                       "%{hiera('svnwcsub::groupname')}"
+apmirror::svnwc_user:                        "%{hiera('svnwcsub::username')}"
+
+svnwcsub::gid:                               '9997'
+svnwcsub::uid:                               '9997'
+svnwcsub::conf_file:                         'svnwcsub.conf'
+svnwcsub:::conf_path:                        '/etc/'
+svnwcsub::groupname:                         'svnwc'
+svnwcsub::groups:
+  - 'svnwc'
+svnwcsub::service_ensure:                    'stopped'
+svnwcsub::service_name:                      'svnwcsub'
+svnwcsub::shell:                             '/bin/bash'
+svnwcsub::username:                          'svnwc'
+
+rsync::package_ensure:                       'latest'
+rsync::server::use_xinetd:                   false
+rsync::server::gid:                  'nogroup' # group 'nobody' doesn't exist in ubuntu
+
+
+apache::custom_config:
+  svn:
+    content: |
+      <Macro BlockSvn>
+        <DirectoryMatch /\.svn>
+          Order allow,deny
+          Deny from all
+        </DirectoryMatch>
+      </Macro>
+
+  tlp:
+    content: |
+      <Macro CatchAll>
+        RewriteEngine On
+        RewriteOptions inherit
+
+        RewriteMap lowercase int:tolower
+
+        # optionally enable per-project favicons
+        RewriteCond %%{}{REQUEST_URI} ^/favicon\.ico$
+        RewriteCond ${lowercase:%%{}{SERVER_NAME}} ^(\w+)(?:\.\w+)?\.apache\.org$
+        RewriteCond /var/www/%1.apache.org/favicon.ico -f
+        RewriteRule ^/favicon\.ico$ /var/www/%1.apache.org/favicon.ico [L]
+
+        # optionally enable per-project favicons for cms sites too
+        RewriteCond %%{}{REQUEST_URI} ^/favicon\.ico$
+        RewriteCond ${lowercase:%%{}{SERVER_NAME}} ^(\w+)(?:\.\w+)?\.apache\.org$
+        RewriteCond /var/www/%1.apache.org/content/favicon.ico -f
+        RewriteRule ^/favicon\.ico$ /var/www/%1.apache.org/content/favicon.ico [L]
+
+        # catchall
+        RewriteRule ^/favicon\.ico$ /var/www/www.apache.org/content/favicon.ico [L]
+
+        # Graduated podlings
+        # ### TODO: this foo.incubator.a.o->foo.a.o redirect breaks if foo ever
+        # ###       moves to the attic.
+        RewriteCond ${lowercase:%%{}{SERVER_NAME}} ^(\w+)\.incubator(\.\w+)?\.apache\.org$
+        RewriteCond /dist/%1 -d
+        RewriteRule ^(.*)$ http://%1%2.apache.org$1 [R,L]
+
+        # change the DocumentRoot to ${DocumentRoot}/content if it exists
+        RewriteCond %%{}{REQUEST_URI}              !^/cgi-bin/
+        RewriteCond %%{}{REQUEST_URI}              !^/[.]revision$
+        RewriteCond ${lowercase:%%{}{SERVER_NAME}} ^(\w+)(?:\.\w+)?\.apache\.org$
+        RewriteCond /var/www/%1.apache.org/content -d
+        RewriteRule ^(.*)$ ${lowercase:%%{}{SERVER_NAME}}$1 [C]
+        RewriteRule ^(\w+)(?:\.\w+)?\.apache\.org/(.*) /var/www/$1.apache.org/content/$2
+      </Macro>
+
+  aoo:
+    content: |
+      <Macro OpenOffice $proto>
+        DocumentRoot /var/www/ooo-site.apache.org/content
+        ServerName www.openoffice.org
+        ServerAlias ooo-site.apache.org
+        ServerAlias *.openoffice.org
+        ServerAlias openoffice.org
+        UseCanonicalName On
+
+        # Silence PROPFIND mod_allowmethods errors
+        # for Apache OO update check requests
+        <LocationMatch "/projects/update[^/]*/ProductUpdateService/check\.Update">
+          LogLevel allowmethods:crit
+        </LocationMatch>
+
+        # Silence PROPFIND mod_allowmethods errors
+        # for Apache OO accesses by "Microsoft-WebDAV-MiniRedir"
+        # (typical URI is "/3")
+        <If "%%{}{REQUEST_METHOD} == 'PROPFIND' && %%{}{HTTP_USER_AGENT} =~ /^Microsoft-WebDAV-MiniRedir/">
+          LogLevel allowmethods:crit
+        </If>
+
+        <Location /projects>
+          ErrorDocument 404 default
+        </Location>
+
+        ErrorDocument 404 /docs/custom_404.html
+
+        RewriteEngine On
+        RewriteOptions inherit
+        RewriteRule ^/favicon\.ico$ /var/www/ooo-site.apache.org/content/favicon.ico [L]
+
+        RewriteMap lowercase int:tolower
+
+        RewriteCond ${lowercase:%%{}{HTTP_HOST}} ^openoffice.org$
+        RewriteRule (.*) $proto://www.openoffice.org$1 [L]
+
+        # kill update.services.openoffice.org
+        RewriteCond ${lowercase:%%{}{HTTP_HOST}} ^update.services.openoffice.org$
+        RewriteRule (.*) - [G,L]
+
+
+        # qa|www.openoffice.org
+        RewriteCond ${lowercase:%%{}{HTTP_HOST}} ^(?:qa|www)(?:\.\w+)?\.openoffice\.org$
+        RewriteRule /issues/(.*) $proto://issues.apache.org/ooo/$1 [NE,L]
+
+        # [registration2|survey].openoffice.org
+        RewriteCond ${lowercase:%%{}{HTTP_HOST}} ^(?:registration2|survey)(?:\.\w+)?\.openoffice\.org$
+        RewriteRule (.*) $proto://www.openoffice.org/legacy/thankyou.html [NE,L]
+
+        # contributing.openoffice.org
+        RewriteCond ${lowercase:%%{}{HTTP_HOST}} ^contributing(?:\.\w+)?\.openoffice\.org$
+        RewriteRule (.*) $proto://openoffice.apache.org/get-involved.html [L]
+
+        RewriteRule /contributing/(.*) $proto://openoffice.apache.org/get-involved.html [L]
+
+        # security.openoffice.org
+        RewriteCond ${lowercase:%%{}{HTTP_HOST}} ^security(?:\.\w+)?\.openoffice\.org$
+        RewriteRule (.*) $proto://openoffice.apache.org/security.html [L]
+
+        # br-pt.openoffice.org typos
+        RewriteCond ${lowercase:%%{}{HTTP_HOST}} ^br-pt(?:\.\w+)?\.openoffice\.org$
+        RewriteRule (.*) $proto://www.openoffice.org/pt-br$1 [L]
+
+        # change foo.openoffice.org/... to www.openoffice.org/foo/... if foo dir exists
+        RewriteCond ${lowercase:%%{}{HTTP_HOST}} ^(\w+)(?:\.\w+)?\.openoffice\.org$
+        RewriteCond /var/www/ooo-site.apache.org/content/%1 -d
+        RewriteRule ^(.*)$ ${lowercase:%%{}{HTTP_HOST}}$1 [C]
+        RewriteRule ^(\w+)(?:\.\w+)?\.openoffice\.org/(.*) $proto://www.openoffice.org/$1/$2 [NE,L,R=permanent]
+
+        # change *.openoffice.org/?lang=foo to www.openoffice.org/foo/ 
+        RewriteCond ${lowercase:%%{}{QUERY_STRING}} lang=([a-z\-]+)
+        RewriteCond /var/www/ooo-site.apache.org/content/%1 -d
+        RewriteRule .* $proto://www.openoffice.org/%1? [NE,L,R=permanent]
+
+        # fallback for proj.openoffice.org/... to openoffice.org/projects/proj/...
+        # The most common case is redirecting
+        #    $proto://updateXXX.services.openoffice.org/ProductUpdateService/check.Update
+        # to $proto://www.openoffice.org/projects/updateXXX/ProductUpdateService/check.Update
+        RewriteCond ${lowercase:%%{}{HTTP_HOST}} ^(?!www)(\w+)(?:\.\w+)?\.openoffice\.org$
+        RewriteRule ^(.*)$ ${lowercase:%%{}{HTTP_HOST}}$1 [C]
+        RewriteRule ^(\w+)(?:\.\w+)?\.openoffice\.org/(.*) $proto://www.openoffice.org/projects/$1/$2 [NE,L]
+      </Macro>
+
+vhosts_asf::modules::modules:
+  allowmethods:
+    name: 'allowmethods'
+  asis:
+    name: 'asis'
+  cgi:
+    name: 'cgi'
+  cgid:
+    name: 'cgid'
+  headers:
+    name: 'headers'
+  include:
+    name: 'include'
+  macro:
+    name: 'macro'
+  unique_id:
+    name: 'unique_id'
+
+vhosts_asf::vhosts::vhosts:
+  apache:
+    vhost_name: '*'
+    port: 80
+    servername: 'www.apache.org'
+    docroot: '/var/www/www.apache.org/content'
+    manage_docroot: false
+    serveraliases:
+      - 'apache.org'
+      - 'apachegroup.org'
+      - 'www.apachegroup.org'
+      - 'www.*.apache.org'
+    directories:
+      -
+        path: '/var/www/www.apache.org/content'
+        options:
+          - 'Indexes'
+          - 'FollowSymLinks'
+          - 'MultiViews'
+          - 'ExecCGI'
+        allow_override:
+          - 'All'
+        addhandlers:
+        -
+          handler: 'cgi-script'
+          extensions:
+            - '.cgi'
+    serveradmin: 'infrastructure@apache.org'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
+    custom_fragment: |
+      Redirect permanent /docs/vif.info http://httpd.apache.org/docs/misc/vif-info
+      Redirect permanent /docs/directives.html http://httpd.apache.org/docs/mod/directives.html
+      Redirect permanent /docs/API.html http://httpd.apache.org/docs/misc/API.html
+      Redirect permanent /docs/FAQ.html http://httpd.apache.org/docs/misc/FAQ.html
+      Redirect permanent /manual-index.cgi/docs http://www.apache.org/search.html
+      Redirect permanent /bugdb.cgi/ http://bugs.apache.org/index/
+      Redirect permanent /bugdb.cgi http://bugs.apache.org/
+      Redirect permanent /Conference1998 http://www.apachecon.com
+      Redirect permanent /java http://archive.apache.org/dist/java/
+      Redirect permanent /perl http://perl.apache.org
+      Redirect permanent /docs/manual http://httpd.apache.org/docs
+      Redirect permanent /docs http://httpd.apache.org/docs
+      Redirect permanent /httpd http://httpd.apache.org
+      Redirect permanent /httpd/ http://httpd.apache.org/
+      Redirect permanent /httpd.html http://httpd.apache.org/
+      Redirect permanent /index/full http://www.apache.org
+      Redirect permanent /info/css-security http://httpd.apache.org/info/css-security
+      Redirect permanent /websrc/ http://cvs.apache.org/
+      Redirect permanent /from-cvs/ http://cvs.apache.org/snapshots/
+      Redirect permanent /travel/application http://tac-apply.apache.org
+      RedirectMatch permanent ^/LICENSE.* http://www.apache.org/licenses/
+      RedirectMatch permanent /flyers(.*) http://www.apache.org/foundation/contributing.html
+
+      RewriteEngine on
+      RewriteOptions inherit
+      RewriteRule /docs/mod_(.*)$ http://httpd.apache.org/docs/mod/mod_$1 [R=permanent]
+
+      #/mail/* -> mail-archives.a.o/mod_mbox/*
+      RewriteRule ^/mail/?$ http://mail-archives.apache.org/mod_mbox/#asf-wide [R=301,L,NE]
+
+      #/mail/* -> mail-archives.a.o/mod_mbox/tlp-list
+      RewriteRule ^/mail/(.*)$ http://mail-archives.apache.org/mod_mbox/asf-wide-$1 [R=301,L]
+
+      # Grab referals from www.apache.com and explain where
+      # they landed.
+      RewriteCond %%{}{HTTP_REFERER} ^http://([^/]*\.)?apache\.com/
+      RewriteRule ^/dist/.* http://www.apache.org/info/referer-dotcom.html [R,L]
+
+      # odd ddos coming from aouu.com
+      RewriteCond %%{}{HTTP_REFERER} aouu.com
+      RewriteRule ^ - [F,L]
+
+      <IfModule mod_expires.c>
+        ExpiresActive On
+        ExpiresDefault A3600
+      </IfModule>
+
+      ## Set " Access-Control-Allow-Origin: *"  as per https://issues.apache.org/jira/browse/INFRA-2877
+      <LocationMatch ^/dist/.*>
+        Header set Access-Control-Allow-Origin "*"
+      </LocationMatch>
+
+      <Directory /var/www/www.apache.org/content/dist>
+        IndexOptions FancyIndexing NameWidth=* FoldersFirst \
+          ScanHTMLTitles DescriptionWidth=*
+        HeaderName HEADER.html
+        ReadmeName README.html
+        AllowOverride FileInfo Indexes
+        Options Indexes SymLinksIfOwnerMatch
+      </Directory>
+
+      <Directory /var/www/www.apache.org/dist/httpd>
+        IndexOptions +FoldersFirst +ScanHTMLTitles +DescriptionWidth=*
+      </Directory>
+
+      <Location "/server-status">
+        SetHandler server-status
+      </Location>
+
+      Use BlockSvn
+
+  tlp:
+    vhost_name: '*'
+    priority: 99
+    port: 80
+    servername: 'www.apache.org'
+    virtual_docroot: '/var/www/%1.0.apache.org'
+    docroot: '/var/www'
+    manage_docroot: false
+    serveraliases:
+      - '*.apache.org'
+    directories:
+      -
+        path: '/var/www'
+        options:
+          - 'Indexes'
+          - 'FollowSymLinks'
+          - 'MultiViews'
+          - 'ExecCGI'
+        allow_override:
+          - 'All'
+        addhandlers:
+          -
+            handler: 'cgi-script'
+            extensions:
+              - '.cgi'
+    serveradmin: 'infrastructure@apache.org'
+    access_log_file: 'weblog.log'
+    error_log_file: 'errorlog.log'
+    custom_fragment: |
+      VirtualScriptAlias /var/www/%1.0.apache.org/cgi-bin
+      UseCanonicalName Off
+      Use CatchAll
+      Use BlockSvn
+      <Directory /var/www/trafficserver.apache.org>
+        Options +Includes
+        AddOutputFilter INCLUDES .html
+      </Directory>
+      <Directory /var/www/subversion.apache.org>
+        Options +Includes
+        AddOutputFilter INCLUDES .html
+      </Directory>
+      AddType text/plain sha512
+      RewriteEngine On
+
+      #/mail -> mail-archives.a.o/mod_mbox/#tlp
+      RewriteCond %%{}{HTTP_HOST} ^([^.]+)\.apache.org$
+      RewriteRule ^/mail/?$ http://mail-archives.apache.org/mod_mbox/#%1 [R=301,L,NE]
+
+      #/mail -> mail-archives.a.o/mod_mbox/#tlp
+      RewriteCond %%{}{HTTP_HOST} ^([^.]+)\.us.apache.org$
+      RewriteRule ^/mail/?$ http://mail-archives.apache.org/mod_mbox/#%1 [R=301,L,NE]
+
+      #/mail -> mail-archives.a.o/mod_mbox/#tlp
+      RewriteCond %%{}{HTTP_HOST} ^([^.]+)\.ipv4.apache.org$
+      RewriteRule ^/mail/?$ http://mail-archives.apache.org/mod_mbox/#%1 [R=301,L,NE]
+
+      #/mail -> mail-archives.a.o/mod_mbox/#tlp
+      RewriteCond %%{}{HTTP_HOST} ^([^.]+)\.us.ipv4.apache.org$
+      RewriteRule ^/mail/?$ http://mail-archives.apache.org/mod_mbox/#%1 [R=301,L,NE]
+
+      #/mail/* -> mail-archives.a.o/mod_mbox/tlp-list
+      RewriteCond %%{}{HTTP_HOST} ^([^.]+)\.apache.org$
+      RewriteRule ^/mail/(.*)$ http://mail-archives.apache.org/mod_mbox/%1-$1 [R=301,L]
+
+      #/mail/* -> mail-archives.a.o/mod_mbox/tlp-list
+      RewriteCond %%{}{HTTP_HOST} ^([^.]+)\.us.apache.org$
+      RewriteRule ^/mail/(.*)$ http://mail-archives.apache.org/mod_mbox/%1-$1 [R=301,L]
+
+      #/mail/* -> mail-archives.a.o/mod_mbox/tlp-list
+      RewriteCond %%{}{HTTP_HOST} ^([^.]+)\.ipv4.apache.org$
+      RewriteRule ^/mail/(.*)$ http://mail-archives.apache.org/mod_mbox/%1-$1 [R=301,L]
+
+      #/mail/* -> mail-archives.a.o/mod_mbox/tlp-list
+      RewriteCond %%{}{HTTP_HOST} ^([^.]+)\.us.ipv4.apache.org$
+      RewriteRule ^/mail/(.*)$ http://mail-archives.apache.org/mod_mbox/%1-$1 [R=301,L]
+
