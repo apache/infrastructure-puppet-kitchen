@@ -3,13 +3,32 @@ puppet-kitchen
 
 Test Kitchen + Puppet
 
+Requirements
+------------
+
+[Vagrant](https://www.vagrantup.com/)
+Ruby + Ruby gems
+[Virtualbox](https://www.virtualbox.org/)
+[ASF's Puppet repo](https://github.com/apache/infrastructure-puppet/)
+
+
 
 Installation
 ------------
 
+Clone ASF's Puppet Repo
++++++++++++++++++++++++
+
+```
+git clone https://github.com/apache/infrastructure-puppet
+```
+
 ```
 gem install bundler
 bundle install
+
+mkdir -p puppet/modules
+cd puppet modules
 ```
 
 Usage
