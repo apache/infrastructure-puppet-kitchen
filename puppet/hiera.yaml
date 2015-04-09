@@ -3,10 +3,10 @@
   - yaml
 
 :hierarchy:
-    #  - "%{::virtual}/%{::asfosname}" # only enal be this if you use a caching service like apt-cacher-ng
-  - "nodes/%{clientcert}"
+#  - "%{::virtual}/%{::asfosname}" # only enal be this if you use a caching service like apt-cacher-ng
+  - "nodes/%{::clientcert}"
   - "%{::asfosname}/%{::asfosrelease}"
-  - "colo/%{asfcolo}"
+  - "colo/%{::asfcolo}"
   - "oem/%{::oem}"
   - "common"
 
