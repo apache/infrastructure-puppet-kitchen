@@ -8,16 +8,19 @@ provisioner:
   modules_path: puppet/modules
   hiera_data_path: puppet/data
   hiera_config_path: puppet/hiera.yaml
+  hiera_deep_merge: true
   vm_hostname: 'test'
   require_chef_for_busser: false
-#  http_proxy: 'http://192.168.1.3:3142' # Disable this unless you use apt-cacher-ng or something that caches
-  require_chef_for_busser: false
+  require_puppet_repo: false
+  puppet_logdest:
+    - 'console'
+  #http_proxy: 'http://192.168.1.3:3142' # Disable this unless you use apt-cacher-ng or something that caches
 
 platforms:
   - name: ubuntu1464
     driver:
-      box: trusty64
-      box_url: http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-14.04_chef-provisionerless.box
+      box: ubuntu1464-puppet
+      box_url: https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-puppet/versions/1.0.1/providers/virtualbox.box
 
 suites:
   - name: default
