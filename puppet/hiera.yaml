@@ -13,3 +13,4 @@
 :yaml:
   :datadir: '/tmp/kitchen/hiera'
 
+:merge_behavior: deeper
