@@ -1,7 +1,10 @@
 ---
 classes:
   - apt
-  - base
+  - apt::unattended_upgrades
+  - apt::update
+  - git_asf
+  - python
   - subversionclient
 
 base::basepackages:
@@ -16,40 +19,130 @@ base::basepackages:
   - libnss-myhostname
   - htop
 
+base::purgedpackages:
+  - 'collectd'
+  - 'collectd-core'
+
+apache::mod::geoip::enable: true
+apache::mod::geoip::flag: 'MemoryCache'
+apache::mod::geoip::db_file:
+ - '/usr/share/GeoIP/GeoIP.dat'
+ - '/usr/share/GeoIP/GeoIPCity.dat'
+
+apache::mod::ssl::ssl_cipher: 'HIGH:MEDIUM:!aNULL:!MD5:!RC4'
+
+apache::log_formats:
+  combined: '<%%JSON:httpd_access%%> {
+    \"time\": \"%%{}{%Y-%m-%dT%H:%M:%S%z}t\",
+    \"clientip\": \"%a\",
+    \"duration\": %D,
+    \"status\": %>s,
+    \"request\": \"%U%q\",
+    \"uri\": \"%U\",
+    \"remote_user\": \"%u\",
+    \"query_string\": \"%q\",
+    \"document\": \"%f\",
+    \"bytes\": %B,
+    \"request_method\": \"%m\",
+    \"referer\": \"%%{}{Referer}i\",
+    \"useragent\": \"%%{}{User-agent}i\",
+    \"vhost\": \"%%{}{Host}i\",
+    \"geo_country\": \"%%{}{GEOIP_COUNTRY_CODE}n\",
+    \"geo_long\": \"%%{}{GEOIP_LONGITUDE}n\",
+    \"geo_lat\": \"%%{}{GEOIP_LATITUDE}n\",
+    \"geo_coords\": \"%%{}{GEOIP_LATITUDE}n,%%{}{GEOIP_LONGITUDE}n\",
+    \"geo_city\": \"%%{}{GEOIP_CITY}n\",
+    \"geo_combo\": \"%%{}{GEOIP_CITY}n, %%{}{GEOIP_COUNTRY_NAME}n\"
+    }'
+
 apt::sources:
   'asf_internal':
-     location: 'http://pkgrepo.apache.org'
-     release: 'trusty'
-     repos: 'main'
-     key: 'E8640030'
-     key_server: 'pgp.mit.edu'
-     include_deb: true
-     include_src: false
+    location: 'https://packages.apache.org/asf_internal'
+    release: 'trusty'
+    repos: 'main'
+    key: '390EF70BB1EA12B2773962950EE62FB37A00258D'
+    key_server: 'pgp.mit.edu'
+    include_deb: true
+    include_src: false
+  'elasticsearch':
+    location: 'https://packages.elasticsearch.org/elasticsearch/1.7/debian'
+    release: 'stable'
+    repos: 'main'
+    key: '46095ACC8548582C1A2699A9D27D666CD88E42B4'
+    key_server: 'pgp.mit.edu'
+    include_deb: true
+    include_src: false
+  'lxc_docker':
+    location: 'https://get.docker.io/ubuntu'
+    release: 'docker'
+    repos: 'main'
+    key: '36A1D7869245C8950F966E92D8576A8BA88D21E9'
+    key_server: 'hkp://keyserver.ubuntu.com:80'
+    include_deb: true
+    include_src: false
   'puppetlabs':
-     location: 'http://apt.puppetlabs.com'
-     release: 'trusty'
-     repos: 'main'
-     key: '4BD6EC30'
-     key_server: 'keyserver.ubuntu.com'
-     include_deb: true
-     include_src: false
+    location: 'https://apt.puppetlabs.com'
+    release: 'trusty'
+    repos: 'main'
+    key: '47B320EB4C7C375AA9DAE1A01054B7A24BD6EC30'
+    key_server: 'keyserver.ubuntu.com'
+    include_deb: true
+    include_src: false
   'puppetdeps':
-     location: 'http://apt.puppetlabs.com'
-     release: 'trusty'
-     repos: 'dependencies'
-     key: '4BD6EC30'
-     key_server: 'keyserver.ubuntu.com'
-     include_deb: true
-     include_src: false
+    location: 'https://apt.puppetlabs.com'
+    release: 'trusty'
+    repos: 'dependencies'
+    key: '47B320EB4C7C375AA9DAE1A01054B7A24BD6EC30'
+    key_server: 'keyserver.ubuntu.com'
+    include_deb: true
+    include_src: false
+  'vmware-tools':
+    location: 'http://packages.vmware.com/packages/ubuntu'
+    release: 'trusty'
+    repos: 'main'
+    key: '36E47E1CC4DCC5E8152D115CC0B5E0AB66FD4949'
+    key_server: 'pgp.mit.edu'
+    include_deb: true
+    include_src: false
 
-fail2ban_asf::config::jails:
-  ssh:
-    filter: sshd
-    port: 22
-    logpath: /var/log/auth.log
-    findtime: 1800
-    maxretry: 5
-    enable: true
+apt::force:
+  'orthrus':
+    release: 'main'
+  require: Apt::Source['asf_internal']
+
+apt::unattended_upgrades::update: 1
+apt::unattended_upgrades::download: 1
+apt::unattended_upgrades::upgrade: 1
+apt::unattended_upgrades::autoclean: 7
+apt::unattended_upgrades::origins:
+  - '${distro_id} ${distro_codename}-security'
+
+logrotate::rule:
+  apache2:
+    name: 'apache2'
+    path: '/var/log/apache2/*.log'
+    ensure: 'absent'
+    compress: true
+    compressoptions: '-9'
+    rotate: 7
+    create_owner: 'root'
+    create_group: 'adm'
+    rotate_every: 'day'
+    create_mode: '0644'
+    missingok: true
+    dateext: true
+    delaycompress: false
+    ifempty: false
+    create: true
+    sharedscripts: true
+    postrotate:
+      - 'if /etc/init.d/apache2 status > /dev/null ; then /etc/init.d/apache2 reload > /dev/null; fi;'
+    prerotate:
+      - 'if [ -d /etc/logrotate.d/httpd-prerotate ]; then run-parts /etc/logrotate.d/httpd-prerotate; fi;'
+
+ntp::interfaces:
+    - eth0
+    - lo
 
 subversionclient::packages:
   - subversion

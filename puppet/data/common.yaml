@@ -1,4 +1,29 @@
 ---
 classes:
   - customfact
+  - base
+  - ntp
+  - ulimit_asf
 
+ntp::disable_monitor: true
+ntp::servers:
+  - 0.freebsd.pool.ntp.org
+  - 1.freebsd.pool.ntp.org
+  - 2.freebsd.pool.ntp.org
+ntp::restrict:
+  - '127.0.0.1'
+  - '::1'
+  - '-4 default kod notrap nomodify nopeer noquery'
+  - '-6 default kod notrap nomodify nopeer noquery'
+
+ulimit::rule:
+  all-hard-nofile:
+    ulimit_domain: '*'
+    ulimit_type: 'hard'
+    ulimit_item: 'nofile'
+    ulimit_value: '1048576'
+  all-soft-nofile:
+    ulimit_domain: '*'
+    ulimit_type: 'soft'
+    ulimit_item: 'nofile'
+    ulimit_value: '1048576'
