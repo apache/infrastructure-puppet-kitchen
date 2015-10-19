@@ -144,6 +144,9 @@ ntp::interfaces:
     - eth0
     - lo
 
+python::dev: true
+python::pip: true
+
 subversionclient::packages:
   - subversion
 subversionclient::svn_conf_config:       '/etc/subversion/config'
