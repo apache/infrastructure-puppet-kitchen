@@ -11,13 +11,16 @@ base::basepackages:
   - apt-file
   - bash
   - ca-certificates
-  - git
+  - havaged
+  - htop
+  - iotop
+  - libnet-snmp-perl
+  - libsnmp-perl
+  - libnss-myhostname
   - sockstat
   - software-properties-common
-  - zsh
   - vim
-  - libnss-myhostname
-  - htop
+  - zsh
 
 base::purgedpackages:
   - 'collectd'
