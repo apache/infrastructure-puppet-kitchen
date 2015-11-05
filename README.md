@@ -32,13 +32,14 @@ bundle install
 ### Get modules
 
 ```
-cd <infra puppet repo>
+cd <path to infra puppet repo>
 ./bin/pull # this will pull in all the 3rd party modules at the specified versions we use in production
 ```
 
 ### Make modules useable
 
 ```
+cd <path to puppet-kitchen repo>
 cd puppet/modules
 for i in $(ls <path to infra-pupet 3rdParty>); do ln -s <path to infra-puppet 3rdParty>/$i ./; done
 for i in $(ls <path to infra-puppet modules>); do ln -s <path to infra-puppet modules>/$i ./; done
