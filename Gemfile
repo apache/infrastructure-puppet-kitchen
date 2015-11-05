@@ -9,3 +9,4 @@ gem "kitchen-puppet"
 gem 'serverspec'
 gem 'busser'
 gem 'kitchen-vagrant'
+gem 'r10k'
