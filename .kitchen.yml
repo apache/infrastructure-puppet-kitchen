@@ -1,6 +1,9 @@
----
 driver:
   name: vagrant
+  customize:
+    ioapic: 'on' # this should be on if you want multiple cores
+    cpus: '2'
+    memory: '2048'
 
 provisioner:
   name: puppet_apply
