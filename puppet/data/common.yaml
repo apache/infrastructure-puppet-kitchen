@@ -4,6 +4,7 @@ classes:
   - base
   - ntp
   - ulimit_asf
+  - timezone
 
 ntp::disable_monitor: true
 ntp::servers:
@@ -27,3 +28,6 @@ ulimit::rule:
     ulimit_type: 'soft'
     ulimit_item: 'nofile'
     ulimit_value: '1048576'
+
+timezone::timezone: 'Etc/UTC'
+timezone::hw_utc: true
