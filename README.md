@@ -32,7 +32,6 @@ bundle install
 ### Get modules
 
 ```
-mkdir -p $puppet-kitchen-root/puppet/modules
 cd puppet/modules
 for i in $(ls <path to infra-pupet 3rdParty>); do ln -s <path to infra-puppet 3rdParty>/$i ./; done
 for i in $(ls <path to infra-puppet modules>); do ln -s <path to infra-puppet modules>/$i ./; done
@@ -57,7 +56,7 @@ Example:
 git clone https://github.com/puppetlabs/puppetlabs-apt.git apt
 ```
 
-Then edit ``puppet/data/node/default-ubuntu14.yaml`` to start adding classes and setting class parameters.
+Then edit ``puppet/data/node/default-ubuntu1464.yaml`` to start adding classes and setting class parameters.
 
 When you're ready to test, just run:
 
