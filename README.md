@@ -7,18 +7,16 @@ Requirements
 ------------
 
 + [Vagrant](https://www.vagrantup.com/)
-+ Ruby + Ruby gems
++ Ruby 2.0 or later
 + [Virtualbox](https://www.virtualbox.org/)
-+ [ASF's Puppet repo](https://github.com/apache/infrastructure-puppet/)
-
-
 
 Installation
 ------------
 
-### Clone ASF's Puppet Repo
+### Clone Repositories
 
 ```
+git clone https://github.com/stumped2/puppet-kitchen
 git clone https://github.com/apache/infrastructure-puppet
 ```
 
@@ -26,6 +24,7 @@ git clone https://github.com/apache/infrastructure-puppet
 
 ```
 gem install bundler
+cd <path to infra puppet repo>
 bundle install
 ```
 
@@ -41,8 +40,9 @@ cd <path to infra puppet repo>
 ```
 cd <path to puppet-kitchen repo>
 cd puppet/modules
-for i in $(ls <path to infra-pupet 3rdParty>); do ln -s <path to infra-puppet 3rdParty>/$i ./; done
-for i in $(ls <path to infra-puppet modules>); do ln -s <path to infra-puppet modules>/$i ./; done
+export ipr=<path to infra-puppet repo>
+for i in $(ls $ipr/3rdParty); do ln -s $ipr/3rdParty/$i ./; done
+for i in $(ls $ipr/modules); do ln -s $ipr/modules/$i ./; done
 ```
 
 Usage
