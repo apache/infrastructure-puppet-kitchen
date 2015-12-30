@@ -11,7 +11,7 @@ base::basepackages:
   - apt-file
   - bash
   - ca-certificates
-  - havaged
+  - haveged
   - htop
   - iotop
   - libnet-snmp-perl
