@@ -3,6 +3,24 @@ puppet-kitchen
 
 Test Kitchen + Puppet
 
+Overview
+--------
+
+Provisioning an Apache Software Foundation VM requires a lot of moving parts
+-- things with names like `apt`, `gem`, `hiera`, `kitchen`, `puppet`, and
+`r10k`.  To make things easier, the Apache infrastructure team provides a base
+definition on top of which you install and configure 'modules'.  Modules can
+be pretty much anything, examples being `ldap` and `tomcat`.
+
+There are two sets of modules that you can draw from: [3rd party modules](https://github.com/apache/infrastructure-puppet/blob/deployment/Puppetfile) and [ASF])https://github.com/apache/infrastructure-puppet/tree/deployment/modules) modules.
+
+As an alternative to a full configuration (which would involve DNS setup,
+etc), the recommended process is to copy the relevant configuration file from
+the [infrastructure-puppet](https://github.com/apache/infrastructure-puppet)
+repository to the `default-ubuntu1464`, make changes to that subset of the
+configuration, and only copying, committing, and pushing the results when
+done.
+
 Requirements
 ------------
 
@@ -45,39 +63,65 @@ for i in $(ls $ipr/3rdParty); do ln -s $ipr/3rdParty/$i ./; done
 for i in $(ls $ipr/modules); do ln -s $ipr/modules/$i ./; done
 ```
 
+### Boostrapping
+
+```
+kitchen create default
+kitchen exec default -c 'sudo gem install deep_merge'
+kitchen converge default
+```
+
 Usage
 -----
 
-Make sure to have some puppet modules in the ``puppet/modules/`` directory.
-The current hiera setup assumes you have the following modules:
+### Basic
 
-+ [apache](https://github.com/puppetlabs/puppetlabs-apache) 
-+ ASF's customfact
-+ [concat](https://github.com/puppetlabs/puppetlabs-concat)
-+ [stdlib](https://github.com/puppetlabs/puppetlabs-stdlib)
-+ [apt](https://github.com/puppetlabs/puppetlabs-apt)
-
-If using [GitHub](https://github.com/) to obtain modules, make sure when you clone the module, it only has the module name on the resulting folder.
-Example:
-
-```
-git clone https://github.com/puppetlabs/puppetlabs-apt.git apt
-```
-
-Then edit ``puppet/data/node/default-ubuntu1464.yaml`` to start adding classes and setting class parameters.
-
-When you're ready to test, just run:
+Start by copying a machine configuration from the
+[data/nodes](https://github.com/apache/infrastructure-puppet/tree/deployment/data/nodes)
+repository to ``puppet/data/node/default-ubuntu1464.yaml``, editing it as
+needed, and then running:
 
 ```
 kitchen converge default
 ```
 
-This will bring up a vm, run puppet apply. From there, you can continue writing your puppet module (in ```puppet/modules/$module```) and testing by running the above command.
+This will bring up a vm, run puppet apply. From there, you can continue modifying the definition and/or writing new puppet module(s) (in ```puppet/modules/$module```) and testing by rerunning the above command.
+
+You can directly `ssh` into your virtual machine using the following command:
+
+```
+kitchen login default
+```
+
+If you have started a service like Apache httpd on this machine, you can
+access it at the following IP address: `192.168.33.2`.
+
+### Modules
+
+Modules are organized into two types: "third party" and "ASF custom".
+
+Third party modules are listed in
+[infrastructure-puppet/Puppetfile](https://raw.githubusercontent.com/apache/infrastructure-puppet/deployment/Puppetfile),
+and updated using the `bin/pull` command described above.  Information on
+locating a module can be found at
+[puppet labs documentation](http://docs.puppetlabs.com/puppet/4.3/reference/quick_start_module_install_nix.html).
+
+Custom modules are stored in
+[infrastructure-puppet/modules/](https://github.com/apache/infrastructure-puppet/tree/deployment/modules).  Again, documentation on how to write a module can be found in the [puppet labs documentation](http://docs.puppetlabs.com/puppet/4.3/reference/quick_writing_nix.html).
+
+### Cleanup
+
+When done, you can take down and remove the VM with the following command:
+
+```
+kitchen destroy default
+```
+
+### Further reading
 
 Most the the [test-kitchen](https://github.com/test-kitchen/test-kitchen#usage)
 option work with puppet, however make sure to see
 the [kitchen-puppet](https://github.com/neillturner/kitchen-puppet/blob/master/provisioner_options.md)
 documentation (even though the explanations aren't nearly as detailed as it needs to be).
-
 
 Most information has been taken from [here](http://ehaselwanter.com/en/blog/2014/05/08/using-test-kitchen-with-puppet/)
