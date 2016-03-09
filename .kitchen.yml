@@ -31,15 +31,9 @@ suites:
     driver_config:
       network:
         - ["private_network", {ip: "192.168.33.2"}]
-      customize:
-        memory: 1024
-        cpus: 2
 
   - name: tlp
     manifest: site.pp
     driver_config:
       network:
         - ["private_network", {ip: "192.168.33.2"}]
-      customize:
-        memory: 1024
-        cpus: 2
