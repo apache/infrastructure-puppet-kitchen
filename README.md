@@ -34,7 +34,7 @@ Installation
 ### Clone Repositories
 
 ```
-git clone https://github.com/stumped2/puppet-kitchen
+git clone https://github.com/apache/infrastructure-puppet-kitchen
 git clone https://github.com/apache/infrastructure-puppet
 ```
 
@@ -42,7 +42,7 @@ git clone https://github.com/apache/infrastructure-puppet
 
 ```
 gem install bundler
-cd <path to infra puppet repo>
+cd <path to infrastructure-puppet repo>
 bundle install
 ```
 
