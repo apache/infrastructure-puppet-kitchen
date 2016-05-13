@@ -12,7 +12,7 @@ Provisioning an Apache Software Foundation VM requires a lot of moving parts
 definition on top of which you install and configure 'modules'.  Modules can
 be pretty much anything, examples being `ldap` and `tomcat`.
 
-There are two sets of modules that you can draw from: [3rd party modules](https://github.com/apache/infrastructure-puppet/blob/deployment/Puppetfile) and [ASF])https://github.com/apache/infrastructure-puppet/tree/deployment/modules) modules.
+There are two sets of modules that you can draw from: [3rd party modules](https://github.com/apache/infrastructure-puppet/blob/deployment/Puppetfile) and [ASF modules](https://github.com/apache/infrastructure-puppet/tree/deployment/modules).
 
 As an alternative to a full configuration (which would involve DNS setup,
 etc), the recommended process is to copy the relevant configuration file from
