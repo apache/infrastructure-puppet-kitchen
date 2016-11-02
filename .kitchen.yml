@@ -5,6 +5,9 @@ driver:
     cpus: '2'
     memory: '2048'
 
+transport:
+  name: sftp
+
 provisioner:
   name: puppet_apply
   manifests_path: puppet/manifests
@@ -24,6 +27,10 @@ platforms:
     driver:
       box: ubuntu1464-puppet
       box_url: https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-puppet/versions/1.0.1/providers/virtualbox.box
+  - name: ubuntu1664
+    driver:
+      box: puppetlabs/ubuntu-16.04-64-puppet
+      box_url: https://atlas.hashicorp.com/puppetlabs/boxes/ubuntu-16.04-64-puppet/versions/1.0.0/providers/virtualbox.box
 
 suites:
   - name: default
