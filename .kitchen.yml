@@ -29,8 +29,9 @@ platforms:
       box_url: https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-puppet/versions/1.0.1/providers/virtualbox.box
   - name: ubuntu1664
     driver:
-      box: puppetlabs/ubuntu-16.04-64-puppet
-      box_url: https://atlas.hashicorp.com/puppetlabs/boxes/ubuntu-16.04-64-puppet/versions/1.0.0/providers/virtualbox.box
+      box: ubuntu/xenial64
+      # this uses the Atlas vagrant box from 
+      # https://atlas.hashicorp.com/ubuntu/boxes/xenial64
 
 suites:
   - name: default
@@ -38,9 +39,15 @@ suites:
     driver_config:
       network:
         - ["private_network", {ip: "192.168.33.2"}]
+    # do not build default on 14.04
+    excludes:
+      - ubuntu1464
 
   - name: tlp
     manifest: site.pp
     driver_config:
       network:
         - ["private_network", {ip: "192.168.33.2"}]
+    # do not build TLP on 16.04
+    excludes:
+      - ubuntu1664

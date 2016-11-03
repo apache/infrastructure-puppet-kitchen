@@ -10,7 +10,7 @@ Provisioning an Apache Software Foundation VM requires a lot of moving parts
 -- things with names like `apt`, `gem`, `hiera`, `kitchen`, `puppet`, and
 `r10k`.  To make things easier, the Apache infrastructure team provides a base
 definition on top of which you install and configure 'modules'.  Modules can
-be pretty much anything, examples being `ldap` and `tomcat`.
+be pretty much anything, examples being `apt` and `tomcat`.
 
 There are two sets of modules that you can draw from: [3rd party modules](https://github.com/apache/infrastructure-puppet/blob/deployment/Puppetfile) and [ASF])https://github.com/apache/infrastructure-puppet/tree/deployment/modules) modules.
 
@@ -67,7 +67,6 @@ for i in $(ls $ipr/modules); do ln -s $ipr/modules/$i ./; done
 
 ```
 kitchen create default
-kitchen exec default -c 'sudo gem install deep_merge'
 kitchen converge default
 ```
 
@@ -102,12 +101,10 @@ Modules are organized into two types: "third party" and "ASF custom".
 
 Third party modules are listed in
 [infrastructure-puppet/Puppetfile](https://raw.githubusercontent.com/apache/infrastructure-puppet/deployment/Puppetfile),
-and updated using the `bin/pull` command described above.  Information on
-locating a module can be found at
-[puppet labs documentation](http://docs.puppetlabs.com/puppet/4.3/reference/quick_start_module_install_nix.html).
+and updated using the `bin/pull` command described above, which uses `r10k` to populate the 3rdParty directory. This is distinctly different than the standard method of installing modules using `puppet module install`.
 
 Custom modules are stored in
-[infrastructure-puppet/modules/](https://github.com/apache/infrastructure-puppet/tree/deployment/modules).  Again, documentation on how to write a module can be found in the [puppet labs documentation](http://docs.puppetlabs.com/puppet/4.3/reference/quick_writing_nix.html).
+[infrastructure-puppet/modules/](https://github.com/apache/infrastructure-puppet/tree/deployment/modules). Documentation on how to write a module can be found in the [puppet labs documentation](https://docs.puppet.com/puppet/3.8/reference/modules_fundamentals.html).
 
 ### Cleanup
 
