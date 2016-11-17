@@ -42,6 +42,9 @@ git clone https://github.com/apache/infrastructure-puppet
 
 ```
 gem install bundler
+gem install test-kitchen
+gem install kitchen-puppet
+gem install kitchen-vagrant
 cd <path to infrastructure-puppet repo>
 bundle install
 ```
@@ -65,7 +68,33 @@ for i in $(ls $ipr/modules); do ln -s $ipr/modules/$i ./; done
 
 ### Boostrapping
 
-```
+ ``
+to upgrade to the latest RubyGems:  gem update --system  ##may need to be administrator or root
+*** NOTE: RubyGems 1.1 and 1.2 have problems upgrading when there is no rubygems-update installed. 
+You will need to use the following instructions if you see Nothing to update. If you have an older version of RubyGems installed, 
+    then you can still do it in two steps:
+
+    $ gem install rubygems-update  # again, might need to be admin/root
+    $ update_rubygems              # ... here too
+kitchen login default-ubuntu1664
+sudo gem install puppet
+sudo gem install bundle
+sudo gem install kitchen-sync
+
+remove the block puppetlabs and puppetdeps from puppet/data/ubuntu/1604.yaml
+In the suites section add the excludes in nfrastructure-puppet-kitchen/.kitchen.yml  as follows:
+suites:
+  - name: default
+    manifest: site.pp
+    driver_config:
+      network:
+        - ["private_network", {ip: "192.168.33.2"}]
+    excludes: 
+        - ubuntu1464  #you get this name from the "platforms"section in the .kitchen.yml file
+
+
+
+from the main directory where you cloned infrastructure-puppet-kitchen
 kitchen create default
 kitchen exec default -c 'sudo gem install deep_merge'
 kitchen converge default
