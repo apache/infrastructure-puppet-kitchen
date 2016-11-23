@@ -25,6 +25,7 @@ Requirements
 ------------
 
 + [Vagrant](https://www.vagrantup.com/)
+  + Must install from [here](https://www.vagrantup.com/docs/installation/) not the gem
 + Ruby 2.0 or later
 + [Virtualbox](https://www.virtualbox.org/)
 
