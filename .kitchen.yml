@@ -17,9 +17,12 @@ provisioner:
   hiera_deep_merge: true
   vm_hostname: 'test'
   require_chef_for_busser: false
-  require_puppet_repo: false
-  puppet_logdest:
-    - 'console'
+#  require_puppet_repo: false
+# puppet_logdest:
+#   - 'console'
+  puppet_debug: true
+  puppet_verbose: true
+
   #http_proxy: 'http://192.168.1.3:3142' # Disable this unless you use apt-cacher-ng or something that caches
 
 platforms:
@@ -30,8 +33,7 @@ platforms:
   - name: ubuntu1664
     driver:
       box: ubuntu/xenial64
-      # this uses the Atlas vagrant box from 
-      # https://atlas.hashicorp.com/ubuntu/boxes/xenial64
+      box_url: https://atlas.hashicorp.com/puppetlabs/boxes/ubuntu-16.04-64-nocm/versions/1.0.0/providers/virtualbox.box
 
 suites:
   - name: default
@@ -39,15 +41,11 @@ suites:
     driver_config:
       network:
         - ["private_network", {ip: "192.168.33.2"}]
-    # do not build default on 14.04
-    excludes:
-      - ubuntu1464
-
+    excludes: 
+        - ubuntu1464
   - name: tlp
     manifest: site.pp
     driver_config:
       network:
         - ["private_network", {ip: "192.168.33.2"}]
-    # do not build TLP on 16.04
-    excludes:
-      - ubuntu1664
+

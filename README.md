@@ -10,7 +10,7 @@ Provisioning an Apache Software Foundation VM requires a lot of moving parts
 -- things with names like `apt`, `gem`, `hiera`, `kitchen`, `puppet`, and
 `r10k`.  To make things easier, the Apache infrastructure team provides a base
 definition on top of which you install and configure 'modules'.  Modules can
-be pretty much anything, examples being `apt` and `tomcat`.
+be pretty much anything, examples being `ldap` and `tomcat`.
 
 There are two sets of modules that you can draw from: [3rd party modules](https://github.com/apache/infrastructure-puppet/blob/deployment/Puppetfile) and [ASF])https://github.com/apache/infrastructure-puppet/tree/deployment/modules) modules.
 
@@ -25,7 +25,6 @@ Requirements
 ------------
 
 + [Vagrant](https://www.vagrantup.com/)
-  + Must install from [here](https://www.vagrantup.com/docs/installation/) not the gem
 + Ruby 2.0 or later
 + [Virtualbox](https://www.virtualbox.org/)
 
@@ -43,6 +42,9 @@ git clone https://github.com/apache/infrastructure-puppet
 
 ```
 gem install bundler
+gem install test-kitchen
+gem install kitchen-puppet
+gem install kitchen-vagrant
 cd <path to infrastructure-puppet repo>
 bundle install
 ```
@@ -66,8 +68,35 @@ for i in $(ls $ipr/modules); do ln -s $ipr/modules/$i ./; done
 
 ### Boostrapping
 
-```
+ ``
+to upgrade to the latest RubyGems:  gem update --system  ##may need to be administrator or root
+*** NOTE: RubyGems 1.1 and 1.2 have problems upgrading when there is no rubygems-update installed. 
+You will need to use the following instructions if you see Nothing to update. If you have an older version of RubyGems installed, 
+    then you can still do it in two steps:
+
+    $ gem install rubygems-update  # again, might need to be admin/root
+    $ update_rubygems              # ... here too
+kitchen login default-ubuntu1664
+sudo gem install puppet
+sudo gem install bundle
+sudo gem install kitchen-sync
+
+remove the block puppetlabs and puppetdeps from puppet/data/ubuntu/1604.yaml
+In the suites section add the excludes in nfrastructure-puppet-kitchen/.kitchen.yml  as follows:
+suites:
+  - name: default
+    manifest: site.pp
+    driver_config:
+      network:
+        - ["private_network", {ip: "192.168.33.2"}]
+    excludes: 
+        - ubuntu1464  #you get this name from the "platforms"section in the .kitchen.yml file
+
+
+
+from the main directory where you cloned infrastructure-puppet-kitchen
 kitchen create default
+kitchen exec default -c 'sudo gem install deep_merge'
 kitchen converge default
 ```
 
@@ -102,10 +131,12 @@ Modules are organized into two types: "third party" and "ASF custom".
 
 Third party modules are listed in
 [infrastructure-puppet/Puppetfile](https://raw.githubusercontent.com/apache/infrastructure-puppet/deployment/Puppetfile),
-and updated using the `bin/pull` command described above, which uses `r10k` to populate the 3rdParty directory. This is distinctly different than the standard method of installing modules using `puppet module install`.
+and updated using the `bin/pull` command described above.  Information on
+locating a module can be found at
+[puppet labs documentation](http://docs.puppetlabs.com/puppet/4.3/reference/quick_start_module_install_nix.html).
 
 Custom modules are stored in
-[infrastructure-puppet/modules/](https://github.com/apache/infrastructure-puppet/tree/deployment/modules). Documentation on how to write a module can be found in the [puppet labs documentation](https://docs.puppet.com/puppet/3.8/reference/modules_fundamentals.html).
+[infrastructure-puppet/modules/](https://github.com/apache/infrastructure-puppet/tree/deployment/modules).  Again, documentation on how to write a module can be found in the [puppet labs documentation](http://docs.puppetlabs.com/puppet/4.3/reference/quick_writing_nix.html).
 
 ### Cleanup
 
