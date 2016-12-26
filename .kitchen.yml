@@ -43,9 +43,16 @@ suites:
         - ["private_network", {ip: "192.168.33.2"}]
     excludes: 
         - ubuntu1464
+  - name: trusty
+    manifest: site.pp
+    driver_config:
+      network:
+        - ["private_network", {ip: "192.168.33.3"}]
+    excludes: 
+        - ubuntu1664
   - name: tlp
     manifest: site.pp
     driver_config:
       network:
-        - ["private_network", {ip: "192.168.33.2"}]
+        - ["private_network", {ip: "192.168.33.4"}]
 
