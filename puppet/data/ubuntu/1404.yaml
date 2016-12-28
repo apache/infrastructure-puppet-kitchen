@@ -36,7 +36,7 @@ apache::mod::ssl::ssl_cipher: 'HIGH:MEDIUM:!aNULL:!MD5:!RC4'
 
 apache::log_formats:
   combined: '<%%JSON:httpd_access%%> {
-    \"time\": \"%%{}{%Y-%m-%dT%H:%M:%S%z}t\",
+    \"time\": \"%%{HIERA}{%Y-%m-%dT%H:%M:%S%z}t\",
     \"clientip\": \"%a\",
     \"duration\": %D,
     \"status\": %>s,
@@ -47,66 +47,109 @@ apache::log_formats:
     \"document\": \"%f\",
     \"bytes\": %B,
     \"request_method\": \"%m\",
-    \"referer\": \"%%{}{Referer}i\",
-    \"useragent\": \"%%{}{User-agent}i\",
-    \"vhost\": \"%%{}{Host}i\",
-    \"geo_country\": \"%%{}{GEOIP_COUNTRY_CODE}n\",
-    \"geo_long\": \"%%{}{GEOIP_LONGITUDE}n\",
-    \"geo_lat\": \"%%{}{GEOIP_LATITUDE}n\",
-    \"geo_coords\": \"%%{}{GEOIP_LATITUDE}n,%%{}{GEOIP_LONGITUDE}n\",
-    \"geo_city\": \"%%{}{GEOIP_CITY}n\",
-    \"geo_combo\": \"%%{}{GEOIP_CITY}n, %%{}{GEOIP_COUNTRY_NAME}n\"
+    \"referer\": \"%%{HIERA}{Referer}i\",
+    \"useragent\": \"%%{HIERA}{User-agent}i\",
+    \"vhost\": \"%%{HIERA}{Host}i\",
+    \"geo_country\": \"%%{HIERA}{GEOIP_COUNTRY_CODE}n\",
+    \"geo_long\": \"%%{HIERA}{GEOIP_LONGITUDE}n\",
+    \"geo_lat\": \"%%{HIERA}{GEOIP_LATITUDE}n\",
+    \"geo_coords\": \"%%{HIERA}{GEOIP_LATITUDE}n,%%{HIERA}{GEOIP_LONGITUDE}n\",
+    \"geo_city\": \"%%{HIERA}{GEOIP_CITY}n\",
+    \"geo_combo\": \"%%{HIERA}{GEOIP_CITY}n, %%{HIERA}{GEOIP_COUNTRY_NAME}n\"
     }'
-
 apt::sources:
   'asf_internal':
     location: 'https://packages.apache.org/asf_internal'
     release: 'trusty'
     repos: 'main'
-    key: '390EF70BB1EA12B2773962950EE62FB37A00258D'
-    key_server: 'pgp.mit.edu'
-    include_deb: true
-    include_src: false
-  'elasticsearch':
+    key:
+      id: '390EF70BB1EA12B2773962950EE62FB37A00258D'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
+    notify_update: true
+  'elasticsearch-1.7':
     location: 'https://packages.elasticsearch.org/elasticsearch/1.7/debian'
     release: 'stable'
     repos: 'main'
-    key: '46095ACC8548582C1A2699A9D27D666CD88E42B4'
-    key_server: 'pgp.mit.edu'
-    include_deb: true
-    include_src: false
-  'lxc_docker':
-    location: 'https://get.docker.io/ubuntu'
-    release: 'docker'
+    key:
+      id: '46095ACC8548582C1A2699A9D27D666CD88E42B4'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
+  'elasticsearch':
+    location: 'https://packages.elastic.co/elasticsearch/2.x/debian'
+    release: 'stable'
     repos: 'main'
-    key: '36A1D7869245C8950F966E92D8576A8BA88D21E9'
-    key_server: 'hkp://keyserver.ubuntu.com:80'
-    include_deb: true
-    include_src: false
+    key:
+      id: '46095ACC8548582C1A2699A9D27D666CD88E42B4'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
+    ensure: absent
+  'elasticsearch-2.x':
+    location: 'https://packages.elastic.co/elasticsearch/2.x/debian'
+    release: 'stable'
+    repos: 'main'
+    key:
+      id: '46095ACC8548582C1A2699A9D27D666CD88E42B4'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
+  'docker-engine':
+    location: 'https://apt.dockerproject.org/repo'
+    release: 'ubuntu-trusty'
+    repos: 'main'
+    key:
+      id: '58118E89F3A912897C070ADBF76221572C52609D'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
   'puppetlabs':
     location: 'https://apt.puppetlabs.com'
     release: 'trusty'
     repos: 'main'
-    key: '47B320EB4C7C375AA9DAE1A01054B7A24BD6EC30'
-    key_server: 'keyserver.ubuntu.com'
-    include_deb: true
-    include_src: false
+    key:
+      id: '6F6B15509CF8E59E6E469F327F438280EF8D349F'
+      server: 'keyserver.ubuntu.com'
+    include:
+      deb: true
+      src: false
   'puppetdeps':
     location: 'https://apt.puppetlabs.com'
     release: 'trusty'
     repos: 'dependencies'
-    key: '47B320EB4C7C375AA9DAE1A01054B7A24BD6EC30'
-    key_server: 'keyserver.ubuntu.com'
-    include_deb: true
-    include_src: false
+    key:
+      id: '6F6B15509CF8E59E6E469F327F438280EF8D349F'
+      server: 'keyserver.ubuntu.com'
+    include:
+      deb: true
+      src: false
   'vmware-tools':
     location: 'http://packages.vmware.com/packages/ubuntu'
     release: 'trusty'
     repos: 'main'
-    key: '36E47E1CC4DCC5E8152D115CC0B5E0AB66FD4949'
-    key_server: 'pgp.mit.edu'
-    include_deb: true
-    include_src: false
+    key:
+      id: '36E47E1CC4DCC5E8152D115CC0B5E0AB66FD4949'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
+  'nodesource-6':
+    location: 'https://deb.nodesource.com/node_6.x'
+    release: 'trusty'
+    repos: 'main'
+    key:
+      id: '9FD3B784BC1C6FC31A8A0A1C1655A0AB68576280'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
 
 apt::force:
   'orthrus':

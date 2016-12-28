@@ -34,15 +34,20 @@ platforms:
     driver:
       box: ubuntu/xenial64
       box_url: https://atlas.hashicorp.com/puppetlabs/boxes/ubuntu-16.04-64-nocm/versions/1.0.0/providers/virtualbox.box
+  - name: apache-trusty
+    driver:
+      box: apache/trusty64
+      box_url: https://atlas.hashicorp.com/apache/boxes/trusty64/versions/1.0.0/providers/virtualbox.box
 
 suites:
-  - name: default
+  - name: xenial
     manifest: site.pp
     driver_config:
       network:
         - ["private_network", {ip: "192.168.33.2"}]
     excludes: 
         - ubuntu1464
+        - apache-trusty
   - name: trusty
     manifest: site.pp
     driver_config:
