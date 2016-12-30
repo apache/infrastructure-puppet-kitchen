@@ -40,7 +40,7 @@ platforms:
       box_url: https://atlas.hashicorp.com/apache/boxes/trusty64/versions/1.0.0/providers/virtualbox.box
 
 suites:
-  - name: xenial
+  - name: fisheye
     manifest: site.pp
     driver_config:
       network:
