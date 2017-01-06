@@ -1,0 +1,506 @@
+---
+classes:
+  - apt
+  - apt::update
+  - base
+  - git_asf
+  - orthrus
+  - postfix::server
+  - python
+  - subversionclient
+  - unattended_upgrades
+
+base::basepackages:
+  - apt-transport-https
+  - apt-file
+  - bash
+  - bc
+  - ca-certificates
+  - htop
+  - iotop
+  - libnet-snmp-perl
+  - libpam-cap
+  - libpam-systemd
+  - libsnmp-perl
+  - nload
+  - screen
+  - sockstat
+  - software-properties-common
+  - tcsh
+  - zsh
+
+base::purgedpackages:
+  - 'collectd'
+  - 'collectd-core'
+
+apache::mod::geoip::enable: true
+apache::mod::geoip::flag: 'MemoryCache'
+apache::mod::geoip::db_file:
+ - '/usr/share/GeoIP/GeoIP.dat'
+ - '/usr/share/GeoIP/GeoIPCity.dat'
+
+apache::mod::ssl::ssl_cipher: 'HIGH:MEDIUM:!aNULL:!MD5:!RC4'
+
+apache::log_formats:
+  combined: '<%%JSON:httpd_access%%> {
+    \"time\": \"%%{HIERA}{%Y-%m-%dT%H:%M:%S%z}t\",
+    \"clientip\": \"%a\",
+    \"duration\": %D,
+    \"status\": %>s,
+    \"request\": \"%U%q\",
+    \"uri\": \"%U\",
+    \"remote_user\": \"%u\",
+    \"query_string\": \"%q\",
+    \"document\": \"%f\",
+    \"bytes\": %B,
+    \"request_method\": \"%m\",
+    \"referer\": \"%%{HIERA}{Referer}i\",
+    \"useragent\": \"%%{HIERA}{User-agent}i\",
+    \"vhost\": \"%%{HIERA}{Host}i\",
+    \"geo_country\": \"%%{HIERA}{GEOIP_COUNTRY_CODE}n\",
+    \"geo_long\": \"%%{HIERA}{GEOIP_LONGITUDE}n\",
+    \"geo_lat\": \"%%{HIERA}{GEOIP_LATITUDE}n\",
+    \"geo_coords\": \"%%{HIERA}{GEOIP_LATITUDE}n,%%{HIERA}{GEOIP_LONGITUDE}n\",
+    \"geo_city\": \"%%{HIERA}{GEOIP_CITY}n\",
+    \"geo_combo\": \"%%{HIERA}{GEOIP_CITY}n, %%{HIERA}{GEOIP_COUNTRY_NAME}n\"
+    }'
+
+apache::trace_enable: Off
+
+apt::sources:
+  'asf_internal':
+    location: 'https://packages.apache.org/asf_internal'
+    release: 'xenial'
+    repos: 'main'
+    key:
+      id: '390EF70BB1EA12B2773962950EE62FB37A00258D'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
+    notify_update: true
+  'elasticsearch':
+    location: 'https://packages.elastic.co/elasticsearch/2.x/debian'
+    release: 'stable'
+    repos: 'main'
+    key:
+      id: '46095ACC8548582C1A2699A9D27D666CD88E42B4'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
+    ensure: absent
+  'elasticsearch-2.x':
+    location: 'https://packages.elastic.co/elasticsearch/2.x/debian'
+    release: 'stable'
+    repos: 'main'
+    key:
+      id: '46095ACC8548582C1A2699A9D27D666CD88E42B4'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
+  'elasticsearch-5.x':
+    location: 'https://artifacts.elastic.co/packages/5.x/apt'
+    release: 'stable'
+    repos: 'main'
+    key:
+      id: '46095ACC8548582C1A2699A9D27D666CD88E42B4'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
+  'docker-engine':
+    location: 'https://apt.dockerproject.org/repo'
+    release: 'ubuntu-xenial'
+    repos: 'main'
+    key:
+      id: '58118E89F3A912897C070ADBF76221572C52609D'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
+  'puppetlabs':
+    location: 'https://apt.puppetlabs.com'
+    release: 'xenial'
+    repos: 'main'
+    key:
+      id: '6F6B15509CF8E59E6E469F327F438280EF8D349F'
+      server: 'keyserver.ubuntu.com'
+    include:
+      deb: true
+      src: false
+  'puppetdeps':
+    location: 'https://apt.puppetlabs.com'
+    release: 'xenial'
+    repos: 'dependencies'
+    key:
+      id: '6F6B15509CF8E59E6E469F327F438280EF8D349F'
+      server: 'keyserver.ubuntu.com'
+    include:
+      deb: true
+      src: false
+  'vmware-tools':
+    location: 'http://packages.vmware.com/packages/ubuntu'
+    release: 'trusty'
+    repos: 'main'
+    key:
+      id: '36E47E1CC4DCC5E8152D115CC0B5E0AB66FD4949'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
+  'nodesource-6':
+    location: 'https://deb.nodesource.com/node_6.x'
+    release: 'xenial'
+    repos: 'main'
+    key:
+      id: '9FD3B784BC1C6FC31A8A0A1C1655A0AB68576280'
+      server: 'pool.sks-keyservers.net'
+    include:
+      deb: true
+      src: false
+
+apt::force:
+  'orthrus':
+    release: 'main'
+    require: Apt::Source['asf_internal']
+
+unattended_upgrades::update: 1
+unattended_upgrades::download: 1
+unattended_upgrades::upgrade: 1
+unattended_upgrades::autoclean: 7
+unattended_upgrades::origins:
+  - '${distro_id} ${distro_codename}-security'
+  - '${distro_id} ${distro_codename}-updates'
+
+apt::always_apt_update: true
+
+base::remove_os_install_user::osinstalluser:  'ubuntu'
+base::remove_os_install_user::osinstallgroup: 'ubuntu'
+
+fail2ban::service_status: true
+
+fail2ban_asf::config::filters:
+  sshd-asf999:
+    filtername: 'sshd-asf999'
+    filtersource: 'puppet:///modules/fail2ban_asf/fail2ban/conf/filter.d/sshd-asf999.conf'
+
+fail2ban_asf::config::actions:
+  asf999-log:
+    actionname: 'asf999-log'
+    actionsource: 'puppet:///modules/fail2ban_asf/fail2ban/conf/action.d/asf999-log.conf'
+
+fail2ban_asf::config::jails:
+  ssh:
+    filter: sshd
+    port: ssh
+    action:
+      - iptables-allports
+    logpath: /var/log/auth.log
+    findtime: 1800
+    maxretry: 5
+    enable: true
+
+  ssh-ddos:
+    filter: sshd-ddos
+    action:
+      - iptables-allports
+    logpath: '/var/log/auth.log'
+    maxretry: 6
+    enable: true
+
+  asf999:
+    filter: 'sshd-asf999'
+    action:
+      - 'asf999-log[name=asf999, dest=root@apache.org, sender=fail2ban@apache.org]'
+    logpath: '/var/log/auth.log'
+    maxretry: 1
+    bantime: 2
+    enable: true
+
+ldapclient::install::ubuntu::1604::tlscertpath:  '/etc/ldap/cacerts/ldap-client.pem'
+ldapclient::install::ubuntu::1604::pamhostcheck: 'yes'
+
+ldapclient::ldapclient_packages:
+    - ldap-auth-client
+    - ldap-utils
+    - libldap-2.4-2
+    - libpam-ldapd
+    - libnss-ldapd
+    - libpam-modules
+    - nslcd
+
+ldapclient::ldapclient_remove_packages:
+    - nscd
+    - libnss-ldap
+
+ldapserver::install::ubuntu::1604::packages:
+  - slapd
+  - slapd-dbg
+
+ntp::interfaces:
+    - eth0
+    - lo
+
+postfix::server::myhostname:             "%{::fqdn}"
+postfix::server::mydomain:               'apache.org'
+postfix::server::mydestination:          "%{::fqdn}, localhost.%{::domain}, localhost"
+postfix::server::inet_interfaces:        'localhost'
+postfix::server::message_size_limit:     '15360000'
+postfix::server::alias_maps:              'hash:/etc/aliases'
+postfix::server::mail_name:              "ASF Mail Server at %{::fqdn}"
+postfix::server::smtpd_sender_restrictions:
+  -  'permit_mynetworks'
+  -  'reject_unknown_sender_domain'
+postfix::server::smtpd_recipient_restrictions:
+  -  'permit_mynetworks'
+  -  'reject_unauth_destination'
+postfix::server::smtpd_tls_key_file:     '/etc/ssl/private/wildcard.apache.org.key'
+postfix::server::smtpd_tls_cert_file:    '/etc/ssl/private/wildcard.apache.org-combined.crt'
+postfix::server::ssl:                    'wildcard.apache.org'
+postfix::server::submission:             'true'
+
+puppet::puppetconf:                      '/etc/puppet/puppet.conf'
+
+python::dev: true
+python::pip: true
+python::virtualenv: true
+
+snmp:snmpd_options: '-Lsd -Lf /dev/null -u snmp -g snmp -p /var/run/snmpd.pid'
+
+spamassassin::package_list:
+  - spamassassin
+
+spamassassin::spamc::haproxy_packagelist:
+  - haproxy
+
+spamassassin::sa_update: '/usr/bin/sa-update && /etc/init.d/spamassassin reload'
+
+subversionclient::packages:
+  - subversion
+subversionclient::svn_conf_config:       '/etc/subversion/config'
+subversionclient::svn_conf_servers:      '/etc/subversion/servers'
+
+subversion_server::packages:
+    - p7zip
+    - python-svn
+    - s3cmd
+    - viewvc
+
+ssh_asf::server_options:
+    AuthorizedKeysCommandUser: 'root'
+
+build_slaves::jenkins::jenkins_pub_key:  'AAAAB3NzaC1yc2EAAAABIwAAAIEAtxkcKDiPh1OaVzaVdc80daKq2sRy8aAgt8u2uEcLClzMrnv/g19db7XVggfT4+HPCqcbFbO3mtVnUnWWtuSEpDjqriWnEcSj2G1P53zsdKEu9qCGLmEFMgwcq8b5plv78PRdAQn09WCBI1QrNMypjxgCKhNNn45WqV4AD8Jp7/8='
+
+build_slaves::jenkins::jenkins_packages:
+  - asf-build-apache-ant-1.8.4
+  - asf-build-apache-ant-1.9.4
+  - asf-build-apache-ant-1.9.7
+  - asf-build-apache-forrest-0.9
+  - asf-build-apache-maven-2.2.1
+  - asf-build-apache-maven-3.0.4
+  - asf-build-apache-maven-3.0.5
+  - asf-build-apache-maven-3.2.1
+  - asf-build-apache-maven-3.2.5
+  - asf-build-apache-maven-3.3.3
+  - asf-build-apache-maven-3.3.9
+  - asf-build-clover-ant-4.1.2
+  - asf-build-findbugs-2.0.3
+  - asf-build-findbugs-3.0.1
+  - asf-build-ibm-java-x86-64-70
+  - asf-build-ibm-java-x86-64-80
+  - asf-build-j2sdk1.4.2-19
+  - asf-build-jdk1.5.0-22-32
+  - asf-build-jdk1.5.0-22-64
+  - asf-build-jdk1.6.0-20-32-unlimited-security
+  - asf-build-jdk1.6.0-45-64
+  - asf-build-jdk1.7.0-79-unlimited-security
+  - asf-build-jdk1.7.0-80
+  - asf-build-jdk1.8.0-66-unlimited-security
+  - asf-build-jdk1.8.0-92
+  - asf-build-jdk1.8.0-102
+  - asf-build-jdk9-ea-b128
+  - asf-build-jdk9-ea-b132
+  - asf-build-jdk9-ea-b139
+  - asf-build-jigsaw-jdk9-ea-b142
+  - asf-build-jira-cli-2.1.0
+
+# Not all build slaves. This is just for Jenkins slaves.
+build_slaves::distro_packages:
+  - ant
+  - asciidoc
+  - autoconf
+  - automake
+  - bison
+  - build-essential
+  - cabal-install
+  - cmake
+  - cppcheck
+  - curl
+  - debhelper
+  - devscripts
+  - dh-make
+  - emacs24-nox
+  - erlang-base
+  - erlang-dev
+  - erlang-eunit
+  - flex
+  - g++
+  - g++-4.8-multilib
+  - g++-multilib
+  - gcc-multilib
+  - ghc
+  - git-core
+  - lib32ncurses5
+  - lib32z1
+  - libapr1-dev
+  - libbit-vector-perl
+  - libboost-dev
+  - libboost-filesystem-dev
+  - libboost-program-options-dev
+  - libboost-system-dev
+  - libboost-test-dev
+  - libc6-dev-i386
+  - libclass-accessor-class-perl
+  - libcppunit-dev
+  - libcurl4-openssl-dev
+  - libevent-dev
+  - libfuse-dev
+  - libghc-binary-dev
+  - libghc-hashable-dev
+  - libghc-http-dev
+  - libghc-network-dev
+  - libghc-unordered-containers-dev
+  - libghc-vector-dev
+  - libglib2.0-dev
+  - libjpeg8-dev
+  - liblzo2-dev
+  - liblua5.2-dev
+  - libmono-system-web4.0-cil
+  - libperl-dev
+  - libqt4-dev
+  - libsasl2-dev
+  - libsnappy-dev
+  - libssl-dev
+  - libstdc++-4.8-dev
+  - libsvn-dev
+  - libswt-gtk-3-java
+  - libswt-gtk-3-jni
+  - libtool
+  - libxml-xpath-perl
+  - libz-dev
+  - linux-headers-4.4.0-34
+  - linux-headers-4.4.0-34-generic
+  - linux-image-4.4.0-34-generic
+  - linux-image-4.4.0-34-lowlatency
+  - lua5.2
+  - docker-engine
+  - mingw-w64
+  - binutils-mingw-w64
+  - mingw-w64-tools
+  - mingw-w64-common
+  - mono-devel
+  - mono-complete
+  - nodejs
+  - nsis
+  - php-pear
+  - php-dev
+  - php7.0-cli
+  - pkg-config
+  - protobuf-compiler
+  - python-all
+  - python-all-dbg
+  - python-all-dev
+  - python-boto
+  - python-setuptools
+  - re2c
+  - ruby
+  - ruby-dev
+  - sharutils
+  - shellcheck
+  - sloccount
+  - swig
+  - tmux
+  - unzip
+  - virtualenvwrapper
+  - xvfb
+
+buildbot_slave::buildbot::buildbot_packages:
+  - asf-build-apache-ant-1.8.4
+  - asf-build-apache-ant-1.9.4
+  - asf-build-apache-ant-1.9.7
+  - asf-build-apache-maven-2.2.1
+  - asf-build-apache-maven-3.0.4
+  - asf-build-apache-maven-3.0.5
+  - asf-build-apache-maven-3.2.1
+  - asf-build-apache-maven-3.2.5
+  - asf-build-apache-maven-3.3.3
+  - asf-build-apache-maven-3.3.9
+  - asf-build-ibm-java-x86-64-80
+  - asf-build-jdk1.5.0-22-32
+  - asf-build-jdk1.5.0-22-64
+  - asf-build-jdk1.6.0-45-64
+  - asf-build-jdk1.7.0-64
+  - asf-build-jdk1.7.0-79-unlimited-security
+  - asf-build-jdk1.7.0-80
+  - asf-build-jdk1.8.0
+  - asf-build-jdk1.8.0-66-unlimited-security
+  - asf-build-jdk1.8.0-92
+  - asf-build-jdk1.8.0-102
+  - asf-build-jdk9-ea-b132
+  - asf-build-jdk9-ea-b139
+  - asf-build-jigsaw-jdk9-ea-b142
+
+buildbot_slave::bb_basepackages:
+  - ant
+  - apache2-dev
+  - autoconf
+  - automake
+  - buildbot-slave
+  - cmake
+  - doxygen
+  - junit4
+  - libapr1
+  - libapr1-dev
+  - libaprutil1
+  - libaprutil1-dev
+  - libpam0g-dev
+  - libserf-1-1
+  - libserf-dev
+  - libsqlite3-0
+  - libsqlite3-dev
+  - maven
+  - pkg-config
+  - python3-dev
+  - python3-markdown
+  - python3-pip
+  - rake
+  - ruby-dev
+  - unzip
+  - virtualenvwrapper
+  - zip
+
+
+logrotate::rule:
+  apache2:
+    name: 'apache2'
+    path: '/var/log/apache2/*.log'
+    ensure: 'absent'
+    compress: true
+    compressoptions: '-9'
+    rotate: 7
+    create_owner: 'root'
+    create_group: 'adm'
+    rotate_every: 'day'
+    create_mode: '0644'
+    missingok: true
+    dateext: true
+    delaycompress: false
+    ifempty: false
+    create: true
+    sharedscripts: true
+    postrotate:
+      - 'if /etc/init.d/apache2 status > /dev/null ; then /etc/init.d/apache2 reload > /dev/null; fi;'
+    prerotate:
+      - 'if [ -d /etc/logrotate.d/httpd-prerotate ]; then run-parts /etc/logrotate.d/httpd-prerotate; fi;'
