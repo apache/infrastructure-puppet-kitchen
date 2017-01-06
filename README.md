@@ -12,7 +12,7 @@ Provisioning an Apache Software Foundation VM requires a lot of moving parts
 definition on top of which you install and configure 'modules'.  Modules can
 be pretty much anything, examples being `ldap` and `tomcat`.
 
-There are two sets of modules that you can draw from: [3rd party modules](https://github.com/apache/infrastructure-puppet/blob/deployment/Puppetfile) and [ASF])https://github.com/apache/infrastructure-puppet/tree/deployment/modules) modules.
+There are two sets of modules that you can draw from: [3rd party modules](https://github.com/apache/infrastructure-puppet/blob/deployment/Puppetfile) and [ASF](https://github.com/apache/infrastructure-puppet/tree/deployment/modules) modules.
 
 As an alternative to a full configuration (which would involve DNS setup,
 etc), the recommended process is to copy the relevant configuration file from
@@ -41,11 +41,15 @@ git clone https://github.com/apache/infrastructure-puppet
 ### Install required gems
 
 ```
+export ipr=<path to infrastructure-puppet repo>
+export ipk=<path to infrastructure-puppet-kitchen repo>
 gem install bundler
 gem install test-kitchen
 gem install kitchen-puppet
 gem install kitchen-vagrant
-cd <path to infrastructure-puppet repo>
+cd $ipr
+bundle install
+cd $ipk
 bundle install
 ```
 
@@ -59,46 +63,48 @@ cd <path to infra puppet repo>
 ### Make modules useable
 
 ```
-cd <path to puppet-kitchen repo>
-cd puppet/modules
-export ipr=<path to infra-puppet repo>
+cd $ipk/puppet/modules
 for i in $(ls $ipr/3rdParty); do ln -s $ipr/3rdParty/$i ./; done
 for i in $(ls $ipr/modules); do ln -s $ipr/modules/$i ./; done
 ```
 
-### Boostrapping
+### Boostrapping Default VM
 
- ``
-to upgrade to the latest RubyGems:  gem update --system  ##may need to be administrator or root
-*** NOTE: RubyGems 1.1 and 1.2 have problems upgrading when there is no rubygems-update installed. 
-You will need to use the following instructions if you see Nothing to update. If you have an older version of RubyGems installed, 
-    then you can still do it in two steps:
+*This section is for the Default VM*
+
+To upgrade to the latest RubyGems:
+
+    $ gem update --system # may need to be administrator or root
+
+*NOTE*: RubyGems 1.1 and 1.2 have problems upgrading when there is no rubygems-update installed.
+
+You will need to use the following instructions if you see Nothing to update. If you have an older version of RubyGems installed,
+then you can still do it in two steps:
 
     $ gem install rubygems-update  # again, might need to be admin/root
     $ update_rubygems              # ... here too
-kitchen login default-ubuntu1664
-sudo gem install puppet
-sudo gem install bundle
-sudo gem install kitchen-sync
+    $ kitchen login default-ubuntu1664
+    $ sudo gem install puppet
+    $ sudo gem install bundle
+    $ sudo gem install kitchen-sync
 
-remove the block puppetlabs and puppetdeps from puppet/data/ubuntu/1604.yaml
-In the suites section add the excludes in nfrastructure-puppet-kitchen/.kitchen.yml  as follows:
+remove the block `puppetlabs` and `puppetdeps` from `puppet/data/ubuntu/1604.yaml`
+In the suites section add the excludes in `$ipk/.kitchen.yml`  as follows:
+```
 suites:
   - name: default
     manifest: site.pp
     driver_config:
       network:
         - ["private_network", {ip: "192.168.33.2"}]
-    excludes: 
+    excludes:
         - ubuntu1464  #you get this name from the "platforms"section in the .kitchen.yml file
-
-
-
-from the main directory where you cloned infrastructure-puppet-kitchen
-kitchen create default
-kitchen exec default -c 'sudo gem install deep_merge'
-kitchen converge default
 ```
+
+    $ cd $ipk
+    $ kitchen create default
+    $ kitchen exec default -c 'sudo gem install deep_merge'
+    $ kitchen converge default
 
 Usage
 -----
@@ -110,20 +116,19 @@ Start by copying a machine configuration from the
 repository to ``puppet/data/node/default-ubuntu1464.yaml``, editing it as
 needed, and then running:
 
-```
-kitchen converge default
-```
+    $ cd $ipk
+    $ kitchen converge default
 
 This will bring up a vm, run puppet apply. From there, you can continue modifying the definition and/or writing new puppet module(s) (in ```puppet/modules/$module```) and testing by rerunning the above command.
 
 You can directly `ssh` into your virtual machine using the following command:
 
-```
-kitchen login default
-```
+    $ kitchen login default
 
 If you have started a service like Apache httpd on this machine, you can
 access it at the following IP address: `192.168.33.2`.
+
+If you don't want to use the default image, you can also do `kitchen list` to get a list of available VMs.
 
 ### Modules
 
@@ -142,9 +147,7 @@ Custom modules are stored in
 
 When done, you can take down and remove the VM with the following command:
 
-```
-kitchen destroy default
-```
+    $ kitchen destroy default
 
 ### Further reading
 

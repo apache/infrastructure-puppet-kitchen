@@ -3,3 +3,4 @@ Gemfile.lock
 .bundle
 puppet/modules/
 ssl/
+.idea/
