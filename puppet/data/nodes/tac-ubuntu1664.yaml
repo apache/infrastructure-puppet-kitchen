@@ -1,7 +1,7 @@
 ---
 
 base::basepackages:
-  - 'python2'
+  - 'python-psycopg2'
 
 classes:
  - apache
