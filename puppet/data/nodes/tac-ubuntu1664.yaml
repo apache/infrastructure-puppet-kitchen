@@ -10,10 +10,12 @@ classes:
  - apache::mod::proxy_http
  - apache::mod::rewrite
  - apache::mod::ssl
+ - apache::mod::wsgi
+
 
 apache::default_vhost: false
 apache::mpm_module: 'event'
-          
+
 apache::mod::event::listenbacklog:           '1023'
 apache::mod::event::maxclients:              '750'
 apache::mod::event::maxconnectionsperchild:  '200000'
