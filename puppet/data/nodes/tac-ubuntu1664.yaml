@@ -1,8 +1,5 @@
 ---
 
-base::basepackages:
-  - 'python-psycopg2'
-
 classes:
  - apache
  - apache::mod::proxy
@@ -11,6 +8,10 @@ classes:
  - apache::mod::rewrite
  - apache::mod::ssl
  - apache::mod::wsgi
+ - tac_asf
+
+base::basepackages:
+    - 'python-psycopg2'
 
 
 apache::default_vhost: false
