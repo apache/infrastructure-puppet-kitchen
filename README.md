@@ -43,7 +43,8 @@ git clone https://github.com/apache/infrastructure-puppet
 ```
 export ipr=<path to infrastructure-puppet repo>
 export ipk=<path to infrastructure-puppet-kitchen repo>
-gem install bundler test-kitchen kitchen-puppet kitchen-vagrant kitchen-sync
+gem install bundler test-kitchen kitchen-vagrant kitchen-sync
+gem install kitchen-puppet -v 2.0.0
 cd $ipr
 bundle install
 cd $ipk
@@ -65,7 +66,7 @@ for i in $(ls $ipr/3rdParty); do ln -s $ipr/3rdParty/$i ./; done
 for i in $(ls $ipr/modules); do ln -s $ipr/modules/$i ./; done
 ```
 
-### Boostrapping Default VM
+### Boostrapping a blank Default VM
 
 *This section is for the Default VM*
 
@@ -91,6 +92,7 @@ suites:
         - ["private_network", {ip: "192.168.33.2"}]
     excludes:
         - ubuntu1464  #you get this name from the "platforms"section in the .kitchen.yml file
+        - apache-trusty #exclude any platform you aren't using
 ```
 
     $ cd $ipk
