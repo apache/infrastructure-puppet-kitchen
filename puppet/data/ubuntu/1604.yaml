@@ -120,46 +120,6 @@ apt::sources:
     include:
       deb: true
       src: false
-  'puppetlabs':
-    location: 'https://apt.puppetlabs.com'
-    release: 'xenial'
-    repos: 'main'
-    key:
-      id: '6F6B15509CF8E59E6E469F327F438280EF8D349F'
-      server: 'keyserver.ubuntu.com'
-    include:
-      deb: true
-      src: false
-  'puppetdeps':
-    location: 'https://apt.puppetlabs.com'
-    release: 'xenial'
-    repos: 'dependencies'
-    key:
-      id: '6F6B15509CF8E59E6E469F327F438280EF8D349F'
-      server: 'keyserver.ubuntu.com'
-    include:
-      deb: true
-      src: false
-  'vmware-tools':
-    location: 'http://packages.vmware.com/packages/ubuntu'
-    release: 'trusty'
-    repos: 'main'
-    key:
-      id: '36E47E1CC4DCC5E8152D115CC0B5E0AB66FD4949'
-      server: 'pool.sks-keyservers.net'
-    include:
-      deb: true
-      src: false
-  'nodesource-6':
-    location: 'https://deb.nodesource.com/node_6.x'
-    release: 'xenial'
-    repos: 'main'
-    key:
-      id: '9FD3B784BC1C6FC31A8A0A1C1655A0AB68576280'
-      server: 'pool.sks-keyservers.net'
-    include:
-      deb: true
-      src: false
 
 apt::force:
   'orthrus':

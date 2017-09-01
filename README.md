@@ -43,10 +43,7 @@ git clone https://github.com/apache/infrastructure-puppet
 ```
 export ipr=<path to infrastructure-puppet repo>
 export ipk=<path to infrastructure-puppet-kitchen repo>
-gem install bundler
-gem install test-kitchen
-gem install kitchen-puppet
-gem install kitchen-vagrant
+gem install bundler test-kitchen kitchen-puppet kitchen-vagrant kitchen-sync
 cd $ipr
 bundle install
 cd $ipk
@@ -83,12 +80,7 @@ then you can still do it in two steps:
 
     $ gem install rubygems-update  # again, might need to be admin/root
     $ update_rubygems              # ... here too
-    $ kitchen login default-ubuntu1664
-    $ sudo gem install puppet
-    $ sudo gem install bundle
-    $ sudo gem install kitchen-sync
 
-remove the block `puppetlabs` and `puppetdeps` from `puppet/data/ubuntu/1604.yaml`
 In the suites section add the excludes in `$ipk/.kitchen.yml`  as follows:
 ```
 suites:
@@ -103,7 +95,6 @@ suites:
 
     $ cd $ipk
     $ kitchen create default
-    $ kitchen exec default -c 'sudo gem install deep_merge'
     $ kitchen converge default
 
 Usage
