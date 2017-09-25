@@ -1,33 +1,12 @@
----
-classes:
-  - customfact
-  - base
-  - ntp
-  - ulimit_asf
-  - timezone
+classes_windows:
+  - asf999_windows::create_user
+  - datadog_agent
 
-ntp::disable_monitor: true
-ntp::servers:
-  - 0.freebsd.pool.ntp.org
-  - 1.freebsd.pool.ntp.org
-  - 2.freebsd.pool.ntp.org
-ntp::restrict:
-  - '127.0.0.1'
-  - '::1'
-  - '-4 default kod notrap nomodify nopeer noquery'
-  - '-6 default kod notrap nomodify nopeer noquery'
+asf999_windows::create_user::user: 'asf999_windows'
+asf999_windows::create_user::groups:
+  - 'Users'
+  - 'Administrators'
 
-ulimit::rule:
-  all-hard-nofile:
-    ulimit_domain: '*'
-    ulimit_type: 'hard'
-    ulimit_item: 'nofile'
-    ulimit_value: '1048576'
-  all-soft-nofile:
-    ulimit_domain: '*'
-    ulimit_type: 'soft'
-    ulimit_item: 'nofile'
-    ulimit_value: '1048576'
+asf999_windows::create_user::password: 'putPassword_here' # do not commit plain text, still working on eyaml support.
 
-timezone::timezone: 'Etc/UTC'
-timezone::hw_utc: true
+datadog_agent::api_key: 'putkey_here' # do not commit plain text, still working on eyaml support.

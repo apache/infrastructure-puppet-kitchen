@@ -1,4 +1,4 @@
-hiera_include("classes")
+hiera_include("classes_windows")
 
 node default {
 }

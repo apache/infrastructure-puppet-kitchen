@@ -3,10 +3,12 @@ driver:
   customize:
     ioapic: 'on' # this should be on if you want multiple cores
     cpus: '2'
-    memory: '2048'
+    memory: '4096' # bumped up for Windows, 4GB is still very low.
 
 transport:
-  name: sftp
+  name: winrm
+  winrm_username: vagrant
+  winrm_password: vagrant
 
 provisioner:
   name: puppet_apply
@@ -17,44 +19,20 @@ provisioner:
   hiera_deep_merge: true
   vm_hostname: 'test'
   require_chef_for_busser: false
-#  require_puppet_repo: false
-# puppet_logdest:
-#   - 'console'
   puppet_debug: true
   puppet_verbose: true
 
   #http_proxy: 'http://192.168.1.3:3142' # Disable this unless you use apt-cacher-ng or something that caches
 
 platforms:
-  - name: ubuntu1464
+  - name: windows
     driver:
-      box: ubuntu1464-puppet
-      box_url: https://vagrantcloud.com/puppetlabs/boxes/ubuntu-14.04-64-puppet/versions/1.0.3/providers/virtualbox.box
-  - name: ubuntu1664
-    driver:
-      box: ubuntu/xenial64
-      box_url: https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-vagrant.box
-  - name: apache-trusty
-    driver:
-      box: apache/trusty64
-      box_url: https://atlas.hashicorp.com/apache/boxes/trusty64/versions/1.0.0/providers/virtualbox.box
+      box: mwrock/Windows2016
+      box_url: https://app.vagrantup.com/mwrock/boxes/Windows2016/versions/0.3.0/providers/virtualbox.box
 
 suites:
-  - name: default
+  - name: wintest
     manifest: site.pp
     driver_config:
       network:
-        - ["private_network", {ip: "192.168.33.5"}]
-    excludes: 
-        - ubuntu1464
-        - apache-trusty
-
-  - name: default
-    manifest: site.pp
-    driver_config:
-      network:
-        - ["private_network", {ip: "192.168.33.5"}]
-    excludes: 
-        - ubuntu1664
-        - apache-trusty
-
+        - ["private_network", {ip: "192.168.33.6"}]
