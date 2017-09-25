@@ -7,7 +7,7 @@
   - "nodes/%{::hostname}"
   - "%{::asfosname}/%{::asfosrelease}"
 #  - "colo/%{::asfcolo}"
-  - "oem/%{::oem}"
+#  - "oem/%{::oem}"
   - "common"
 
 :yaml:

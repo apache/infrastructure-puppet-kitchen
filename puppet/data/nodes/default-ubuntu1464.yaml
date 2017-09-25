@@ -1,0 +1,8 @@
+classes:
+  - buildbot_slave
+  - buildbot_slave::rat
+
+buildbot_slave::slave_name: 'bb_slave_christtest'
+buildbot_slave::slave_password: 'foo'
+buildbot_slave::gsr_user: 'foo'
+buildbot_slave::gsr_pw: 'foo'

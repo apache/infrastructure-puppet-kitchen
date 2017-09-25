@@ -40,24 +40,21 @@ platforms:
       box_url: https://atlas.hashicorp.com/apache/boxes/trusty64/versions/1.0.0/providers/virtualbox.box
 
 suites:
-  - name: xenial
+  - name: default
     manifest: site.pp
     driver_config:
       network:
-        - ["private_network", {ip: "192.168.33.2"}]
+        - ["private_network", {ip: "192.168.33.5"}]
     excludes: 
         - ubuntu1464
         - apache-trusty
-  - name: trusty
+
+  - name: default
     manifest: site.pp
     driver_config:
       network:
-        - ["private_network", {ip: "192.168.33.3"}]
+        - ["private_network", {ip: "192.168.33.5"}]
     excludes: 
         - ubuntu1664
-  - name: tlp
-    manifest: site.pp
-    driver_config:
-      network:
-        - ["private_network", {ip: "192.168.33.4"}]
+        - apache-trusty
 
