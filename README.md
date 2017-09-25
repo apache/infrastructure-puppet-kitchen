@@ -1,7 +1,7 @@
-puppet-kitchen
+puppet-kitchen Windows Environment
 ==============
 
-Test Kitchen + Puppet
+Test Kitchen + Puppet + Windows
 
 Overview
 --------
@@ -24,32 +24,14 @@ done.
 Requirements
 ------------
 
-+ [Vagrant](https://www.vagrantup.com/)
-+ Ruby 2.0 or later
-+ [Virtualbox](https://www.virtualbox.org/)
++ This doc assumes you are running a working version of the existing kitchen from Master. Please follow the list of instructions in that branch.
 
-Installation
-------------
+Usage
+-----
 
-### Clone Repositories
+### Basic
 
-```
-git clone https://github.com/apache/infrastructure-puppet-kitchen
-git clone https://github.com/apache/infrastructure-puppet
-```
-
-### Install required gems
-
-```
-export ipr=<path to infrastructure-puppet repo>
-export ipk=<path to infrastructure-puppet-kitchen repo>
-gem install bundler test-kitchen kitchen-vagrant kitchen-sync
-gem install kitchen-puppet -v 2.0.0
-cd $ipr
-bundle install
-cd $ipk
-bundle install
-```
+Currently the base machine yaml is hard coded to ..puppet/data/nodes/wintest-windows.yaml. For the remainder of this doc, that will referenced as such.
 
 ### Get modules
 
@@ -66,63 +48,6 @@ for i in $(ls $ipr/3rdParty); do ln -s $ipr/3rdParty/$i ./; done
 for i in $(ls $ipr/modules); do ln -s $ipr/modules/$i ./; done
 ```
 
-### Boostrapping a blank Default VM
-
-*This section is for the Default VM*
-
-To upgrade to the latest RubyGems:
-
-    $ gem update --system # may need to be administrator or root
-
-*NOTE*: RubyGems 1.1 and 1.2 have problems upgrading when there is no rubygems-update installed.
-
-You will need to use the following instructions if you see Nothing to update. If you have an older version of RubyGems installed,
-then you can still do it in two steps:
-
-    $ gem install rubygems-update  # again, might need to be admin/root
-    $ update_rubygems              # ... here too
-
-In the suites section add the excludes in `$ipk/.kitchen.yml`  as follows:
-```
-suites:
-  - name: default
-    manifest: site.pp
-    driver_config:
-      network:
-        - ["private_network", {ip: "192.168.33.2"}]
-    excludes:
-        - ubuntu1464  #you get this name from the "platforms"section in the .kitchen.yml file
-        - apache-trusty #exclude any platform you aren't using
-```
-
-    $ cd $ipk
-    $ kitchen create default
-    $ kitchen converge default
-
-Usage
------
-
-### Basic
-
-Start by copying a machine configuration from the
-[data/nodes](https://github.com/apache/infrastructure-puppet/tree/deployment/data/nodes)
-repository to ``puppet/data/node/default-ubuntu1464.yaml``, editing it as
-needed, and then running:
-
-    $ cd $ipk
-    $ kitchen converge default
-
-This will bring up a vm, run puppet apply. From there, you can continue modifying the definition and/or writing new puppet module(s) (in ```puppet/modules/$module```) and testing by rerunning the above command.
-
-You can directly `ssh` into your virtual machine using the following command:
-
-    $ kitchen login default
-
-If you have started a service like Apache httpd on this machine, you can
-access it at the following IP address: `192.168.33.2`.
-
-If you don't want to use the default image, you can also do `kitchen list` to get a list of available VMs.
-
 ### Modules
 
 Modules are organized into two types: "third party" and "ASF custom".
@@ -134,7 +59,18 @@ locating a module can be found at
 [puppet labs documentation](http://docs.puppetlabs.com/puppet/4.3/reference/quick_start_module_install_nix.html).
 
 Custom modules are stored in
-[infrastructure-puppet/modules/](https://github.com/apache/infrastructure-puppet/tree/deployment/modules).  Again, documentation on how to write a module can be found in the [puppet labs documentation](http://docs.puppetlabs.com/puppet/4.3/reference/quick_writing_nix.html).
+[infrastructure-puppet/environments/windows/modules/](https://github.com/apache/infrastructure-puppet/tree/deployment/environments/windows/modules).  Again, documentation on how to write a module can be found in the [puppet labs documentation](http://docs.puppetlabs.com/puppet/4.3/reference/quick_writing_nix.html).
+
+Node data are still stored in ../data/nodes/machine.a.o.yaml format.
+
+### Usage
+
+Same spin up as the other kitchen:
+
+    $ kitchen create wintest-windows
+
+However this will open a VirutalBox window where you can login and interact with Windows (instead of ssh)
+Default username and password is in .kitchen.yml
 
 ### Cleanup
 
