@@ -1,14 +1,15 @@
 /*!
- * is-valid-instance (https://github.com/jonschlinkert/is-valid-instance)
+ * is-valid-instance <https://github.com/jonschlinkert/is-valid-instance>
  *
- * Copyright (c) 2016, Jon Schlinkert.
- * Licensed under the MIT License.
+ * Copyright (c) 2016-2017, Jon Schlinkert.
+ * Released under the MIT License.
  */
 
 'use strict';
 
 var isObject = require('isobject');
 var pascal = require('pascalcase');
+var nameCache = {};
 
 /**
  * By default a valid instance is an instance of `Base` with an `isApp` property set to `true`.
@@ -88,12 +89,18 @@ function hasAnyType(val, names, name) {
 }
 
 function isType(val, type, name) {
-  return val[isName(type)] === true || val._name === type || name === type;
+  return val.type === type
+    || val._name === type
+    || name === type
+    || val[isName(type)] === true;
 }
 
 function isName(type) {
   if (!type) return;
-  return 'is' + pascal(type.toString());
+  if (nameCache[type]) return nameCache[type];
+  var name = 'is' + pascal(type.toString());
+  nameCache[name] = name;
+  return name;
 }
 
 function toName(str) {

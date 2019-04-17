@@ -32,12 +32,13 @@ module.exports = function(val, names, fn) {
     return false;
   }
 
-  var ctor = val.constructor;
-  if (typeof ctor === 'undefined' || typeof ctor.name === 'undefined') {
+  // if it's not an instance of `Base`, and it's not a vinyl file, return false
+  if (!val.isBase && !val._isVinyl) {
     return false;
   }
-  if (ctor.name === 'Object') {
-    return false;
+
+  if (arrayify(names).indexOf('*') === 0 || arrayify(names).indexOf('any') === 0) {
+    return true;
   }
 
   if (typeof names === 'function') {
@@ -49,10 +50,11 @@ module.exports = function(val, names, fn) {
     return fn(val, names);
   }
 
-  var name = isName(ctor.name);
   if (typeof names === 'undefined' && val.isApp !== true) {
     return false;
   }
+
+  var ctor = val.constructor;
   return hasAnyType(val, names, val._name) === true
     || hasAnyType(val, names, ctor.name) === true
     || hasAnyType(val, names, toName(val._name)) === true;
@@ -68,6 +70,7 @@ function hasAnyType(val, names, name) {
   }
 
   name = name.toLowerCase();
+  var types = ['file', 'vinyl', 'view'];
   var arr = arrayify(names);
   var len = arr.length;
   var idx = -1;
@@ -77,7 +80,7 @@ function hasAnyType(val, names, name) {
     if (isType(val, type, name)) {
       return true;
     }
-    if ((type === 'file' || type === 'vinyl' || type === 'view') && (name === 'file' || name === 'vinyl' || name === 'view')) {
+    if (types.indexOf(type) !== -1 && types.indexOf(name) !== -1) {
       return true;
     }
   }

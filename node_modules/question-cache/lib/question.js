@@ -61,7 +61,9 @@ function createNext(question) {
   if (!question.options.next) return;
 
   if (typeof question.options.next === 'function') {
-    question.next = question.options.next.bind(question);
+    question.next = function() {
+      question.options.next.apply(question, arguments);
+    };
     return;
   }
 
@@ -136,6 +138,11 @@ Question.prototype.opts = function(options) {
   return opts;
 };
 
+Question.prototype.setAnswer = function(val) {
+  this.answer = val;
+  return this;
+};
+
 /**
  * Resolve the answer for the question from the given data sources, then
  * set the question's `default` value with any stored hints or answers
@@ -152,7 +159,7 @@ Question.prototype.opts = function(options) {
  * @api public
  */
 
-Question.prototype.answer = function(answers, data, app) {
+Question.prototype.getAnswer = function(answers, data, app) {
   debug('looking for answer for: "%s"', this.name);
 
   // data passed on options
@@ -170,18 +177,19 @@ Question.prototype.answer = function(answers, data, app) {
     debug('answer:answers.get %j', util.inspect(answer));
   }
   // app.store, if one exists
-  if (app.store && typeof answer === 'undefined') {
+  if (typeof answer === 'undefined' && app.store) {
     answer = app.store.get(this.name);
     debug('answer:store.get %j', util.inspect(answer));
   }
   // app.globals store, if one exists
-  if (app.globals && typeof answer === 'undefined' && this.options.global === true) {
+  if (typeof answer === 'undefined' && this.options.global === true && app.globals) {
     answer = app.globals.get(this.name);
     debug('answer:globals.get %j', util.inspect(answer));
   }
   // if `type` is checkbox, return now. we don't want to set hints for checkboxes
-  if (this.type === 'checkbox') {
+  if (this.type === 'checkbox' || this.options.hints === false) {
     debug('returning answer: %j', answer);
+    this.setAnswer(answer);
     return answer;
   }
   if (typeof answer !== 'undefined') {
@@ -189,12 +197,13 @@ Question.prototype.answer = function(answers, data, app) {
     debug('default:answer %j', util.inspect(this.default));
   }
   // app.hints store, if one exists
-  if (app.hints && typeof this.default === 'undefined') {
+  if (typeof this.default === 'undefined' && app.hints) {
     this.default = app.hints.get(this.name);
     debug('default:hint %j', util.inspect(this.default));
   }
 
   debug('returning answer: %j', answer);
+  this.setAnswer(answer);
   return answer;
 };
 

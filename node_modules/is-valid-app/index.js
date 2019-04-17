@@ -1,8 +1,8 @@
 /*!
- * is-valid-app (https://github.com/jonschlinkert/is-valid-app)
+ * is-valid-app <https://github.com/node-base/is-valid-app>
  *
- * Copyright (c) 2016, Jon Schlinkert.
- * Licensed under the MIT License.
+ * Copyright (c) 2016-2017, Jon Schlinkert.
+ * Released under the MIT License.
  */
 
 'use strict';
